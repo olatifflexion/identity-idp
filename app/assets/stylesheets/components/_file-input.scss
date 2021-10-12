@@ -42,6 +42,7 @@
 
 .usa-form-group--success .usa-file-input .usa-file-input__target {
   border-color: color('success');
+  border-style: solid;
 
   &:hover {
     border-color: color('success-dark');
