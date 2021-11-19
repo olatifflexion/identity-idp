@@ -187,6 +187,7 @@ module SamlIdpAuthConcern
 
   def request_url
     url = URI.parse request.original_url
+    url.path = url.path.gsub('post', '') if url.path.match?(/authpost/)
     query_params = Rack::Utils.parse_nested_query url.query
     unless query_params['SAMLRequest']
       orig_saml_request = saml_request.options[:get_params][:SAMLRequest]
