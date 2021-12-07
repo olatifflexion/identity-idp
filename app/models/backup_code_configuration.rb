@@ -9,9 +9,6 @@ class BackupCodeConfiguration < ApplicationRecord
 
   belongs_to :user
 
-  attr_accessor :skip_legacy_encryption
-  alias_method :skip_legacy_encryption?, :skip_legacy_encryption
-
   def self.unused
     where(used_at: nil)
   end
@@ -51,23 +48,13 @@ class BackupCodeConfiguration < ApplicationRecord
         scrypt_password_digest(password: code, salt: salt, cost: cost)
       end
 
-      where(
-        code_fingerprint: create_fingerprint(code),
-      ).or(
-        where(salted_code_fingerprint: salted_fingerprints),
-      ).find_by(user_id: user_id)
+      where(salted_code_fingerprint: salted_fingerprints).find_by(user_id: user_id)
     end
 
     def scrypt_password_digest(password:, salt:, cost:)
       scrypt_salt = cost + OpenSSL::Digest::SHA256.hexdigest(salt)
       scrypted = SCrypt::Engine.hash_secret password, scrypt_salt, 32
       SCrypt::Password.new(scrypted).digest
-    end
-
-    private
-
-    def create_fingerprint(code)
-      Pii::Fingerprinter.fingerprint(code)
     end
   end
 end

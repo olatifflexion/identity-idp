@@ -11,22 +11,46 @@ feature 'doc auth welcome step' do
     expect(page).to have_current_path(idv_doc_auth_agreement_step)
   end
 
-  context 'button is disabled when JS is enabled', :js do
+  context 'when JS is enabled', :js do
     before do
       sign_in_and_2fa_user
       complete_doc_auth_steps_before_agreement_step
     end
 
-    it_behaves_like 'ial2 consent'
+    it 'shows an inline error if the user clicks continue without giving consent' do
+      click_continue
+
+      expect_doc_auth_first_step
+      expect(page).to have_content(t('forms.validation.required_checkbox'))
+    end
+
+    it 'allows the user to continue after checking the checkbox' do
+      check t('doc_auth.instructions.consent', app_name: APP_NAME)
+      click_continue
+
+      expect_doc_auth_upload_step
+    end
   end
 
-  context 'button is clickable when JS is disabled' do
+  context 'when JS is disabled' do
     before do
       sign_in_and_2fa_user
       complete_doc_auth_steps_before_agreement_step
     end
 
-    it_behaves_like 'ial2 consent'
+    it 'shows the notice if the user clicks continue without giving consent' do
+      click_continue
+
+      expect_doc_auth_first_step
+      expect(page).to have_content(t('errors.doc_auth.consent_form'))
+    end
+
+    it 'allows the user to continue after checking the checkbox' do
+      check t('doc_auth.instructions.consent', app_name: APP_NAME)
+      click_continue
+
+      expect_doc_auth_upload_step
+    end
   end
 
   context 'skipping upload step', :js, driver: :headless_chrome_mobile do
@@ -38,7 +62,7 @@ feature 'doc auth welcome step' do
 
       sign_in_and_2fa_user
       complete_doc_auth_steps_before_agreement_step
-      find('label', text: /^By checking this box/).click
+      check t('doc_auth.instructions.consent', app_name: APP_NAME)
       click_continue
     end
 
@@ -51,12 +75,6 @@ feature 'doc auth welcome step' do
       expect(log.upload_view_count).to eq 1
       expect(log.upload_view_at).not_to be_nil
 
-      expect(fake_analytics).to have_logged_event(
-        Analytics::DOC_AUTH + ' visited', step: 'upload', step_count: 1
-      )
-      expect(fake_analytics).to have_logged_event(
-        Analytics::DOC_AUTH + ' submitted', step: 'upload', step_count: 2, success: true
-      )
       expect(fake_analytics).to have_logged_event(
         'IdV: ' + "#{Analytics::DOC_AUTH} upload visited".downcase, step: 'upload', step_count: 1
       )

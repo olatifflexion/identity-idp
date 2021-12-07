@@ -15,7 +15,11 @@ Rails.application.routes.draw do
   SamlEndpoint.suffixes.each do |suffix|
     get "/api/saml/metadata#{suffix}" => 'saml_idp#metadata', format: false
     match "/api/saml/logout#{suffix}" => 'saml_idp#logout', via: %i[get post delete]
-    match "/api/saml/auth#{suffix}" => 'saml_idp#auth', via: %i[get post]
+    # JS-driven POST redirect route to preserve existing session
+    post "/api/saml/auth#{suffix}" => 'saml_post#auth'
+    # actual SAML handling POST route
+    post "/api/saml/authpost#{suffix}" => 'saml_idp#auth'
+    get "/api/saml/auth#{suffix}" => 'saml_idp#auth'
   end
 
   post '/api/service_provider' => 'service_provider#update'
@@ -158,6 +162,7 @@ Rails.application.routes.draw do
 
     get '/errors/service_provider_inactive' => 'users/service_provider_inactive#index',
         as: :sp_inactive_error
+    get '/errors/vendor' => 'vendor_outage#show', as: :vendor_outage
 
     get '/events/disavow' => 'event_disavowal#new', as: :event_disavowal
     post '/events/disavow' => 'event_disavowal#create', as: :events_disavowal
@@ -242,8 +247,11 @@ Rails.application.routes.draw do
     put '/user_authorization_confirmation/reset' => 'users/authorization_confirmation#update', as: :reset_user_authorization
     get '/sign_up/cancel/' => 'sign_up/cancellations#new', as: :sign_up_cancel
 
-    get '/return_to_sp/cancel' => 'return_to_sp#cancel'
-    get '/return_to_sp/failure_to_proof' => 'return_to_sp#failure_to_proof'
+    get '/redirect/return_to_sp/cancel' => 'redirect/return_to_sp#cancel', as: :return_to_sp_cancel
+    get '/redirect/return_to_sp/failure_to_proof' => 'redirect/return_to_sp#failure_to_proof', as: :return_to_sp_failure_to_proof
+    get '/redirect/help_center' => 'redirect/help_center#show', as: :help_center_redirect
+    get '/return_to_sp/cancel' => redirect('/redirect/return_to_sp/cancel') # Temporary: Remove after RC169
+    get '/return_to_sp/failure_to_proof' => redirect('/redirect/return_to_sp/failure_to_proof') # Temporary: Remove after RC169
 
     match '/sign_out' => 'sign_out#destroy', via: %i[get post delete]
 
@@ -265,7 +273,6 @@ Rails.application.routes.draw do
       get '/phone' => 'phone#new'
       put '/phone' => 'phone#create'
       get '/phone/errors/warning' => 'phone_errors#warning'
-      get '/phone/errors/timeout' => 'phone_errors#timeout'
       get '/phone/errors/jobfail' => 'phone_errors#jobfail'
       get '/phone/errors/failure' => 'phone_errors#failure'
       post '/phone/resend_code' => 'resend_otp#create', as: :resend_otp

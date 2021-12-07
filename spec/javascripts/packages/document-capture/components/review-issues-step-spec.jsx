@@ -7,7 +7,7 @@ import {
 import ReviewIssuesStep, {
   reviewIssuesStepValidator,
 } from '@18f/identity-document-capture/components/review-issues-step';
-import { I18nContext } from '@18f/identity-react-i18n';
+import { toFormEntryError } from '@18f/identity-document-capture/services/upload';
 import { render } from '../../../support/document-capture';
 import { useSandbox } from '../../../support/sinon';
 import { getFixtureFile } from '../../../support/file';
@@ -60,8 +60,42 @@ describe('document-capture/components/review-issues-step', () => {
     });
   });
 
+  it('renders initially with warning page and displays attempts remaining', () => {
+    const { getByRole, getByText } = render(<ReviewIssuesStep remainingAttempts={3} />);
+
+    expect(getByText('errors.doc_auth.throttled_heading')).to.be.ok();
+    expect(getByText('idv.failure.attempts.other')).to.be.ok();
+    expect(getByRole('button', { name: 'idv.failure.button.warning' })).to.be.ok();
+  });
+
+  it('renders warning page with error and displays one attempt remaining then continues on', () => {
+    const { getByRole, getByLabelText, getByText } = render(
+      <ReviewIssuesStep
+        remainingAttempts={1}
+        unknownFieldErrors={[
+          {
+            field: 'unknown',
+            error: toFormEntryError({ field: 'unknown', message: 'An unknown error occurred' }),
+          },
+        ]}
+      />,
+    );
+
+    expect(getByText('errors.doc_auth.throttled_heading')).to.be.ok();
+    expect(getByText('idv.failure.attempts.one')).to.be.ok();
+    expect(getByText('An unknown error occurred')).to.be.ok();
+    expect(getByRole('button', { name: 'idv.failure.button.warning' })).to.be.ok();
+
+    userEvent.click(getByRole('button', { name: 'idv.failure.button.warning' }));
+
+    expect(getByText('An unknown error occurred')).to.be.ok();
+    expect(getByLabelText('doc_auth.headings.document_capture_front')).to.be.ok();
+  });
+
   it('renders with front, back, and selfie inputs', () => {
-    const { getByLabelText } = render(<ReviewIssuesStep />);
+    const { getByLabelText, getByRole } = render(<ReviewIssuesStep />);
+
+    userEvent.click(getByRole('button', { name: 'idv.failure.button.warning' }));
 
     expect(getByLabelText('doc_auth.headings.document_capture_front')).to.be.ok();
     expect(getByLabelText('doc_auth.headings.document_capture_back')).to.be.ok();
@@ -70,8 +104,9 @@ describe('document-capture/components/review-issues-step', () => {
 
   it('calls onChange callback with uploaded image', async () => {
     const onChange = sinon.stub();
-    const { getByLabelText } = render(<ReviewIssuesStep onChange={onChange} />);
+    const { getByLabelText, getByRole } = render(<ReviewIssuesStep onChange={onChange} />);
     const file = await getFixtureFile('doc_auth_images/id-back.jpg');
+    userEvent.click(getByRole('button', { name: 'idv.failure.button.warning' }));
 
     userEvent.upload(getByLabelText('doc_auth.headings.document_capture_front'), file);
     await new Promise((resolve) => onChange.callsFake(resolve));
@@ -98,7 +133,7 @@ describe('document-capture/components/review-issues-step', () => {
       true,
       ['encrypt', 'decrypt'],
     );
-    const { getByLabelText } = render(
+    const { getByLabelText, getByRole } = render(
       <UploadContextProvider
         backgroundUploadURLs={{ back: 'about:blank#back' }}
         backgroundUploadEncryptKey={key}
@@ -108,6 +143,7 @@ describe('document-capture/components/review-issues-step', () => {
     );
 
     const file = await getFixtureFile('doc_auth_images/id-back.jpg');
+    userEvent.click(getByRole('button', { name: 'idv.failure.button.warning' }));
 
     userEvent.upload(getByLabelText('doc_auth.headings.document_capture_back'), file);
     await new Promise((resolve) => onChange.callsFake(resolve));
@@ -116,38 +152,36 @@ describe('document-capture/components/review-issues-step', () => {
     expect(window.fetch.getCall(0).args[0]).to.equal('about:blank#back');
   });
 
+  it('renders troubleshooting options', () => {
+    const { getByRole } = render(
+      <ServiceProviderContextProvider
+        value={{
+          name: 'Example App',
+          failureToProofURL: 'https://example.com/?step=document_capture',
+          isLivenessRequired: false,
+        }}
+      >
+        <ReviewIssuesStep />
+      </ServiceProviderContextProvider>,
+    );
+
+    userEvent.click(getByRole('button', { name: 'idv.failure.button.warning' }));
+
+    expect(
+      getByRole('heading', { name: 'idv.troubleshooting.headings.having_trouble' }),
+    ).to.be.ok();
+    expect(
+      getByRole('link', { name: 'idv.troubleshooting.options.get_help_at_sp links.new_window' })
+        .href,
+    ).to.equal(
+      'https://example.com/?step=document_capture&location=document_capture_troubleshooting_options',
+    );
+  });
+
   context('service provider context', () => {
-    it('renders with name and help link', () => {
-      const { getByText } = render(
-        <I18nContext.Provider
-          value={{
-            'doc_auth.info.get_help_at_sp_html':
-              '<strong>Having trouble?</strong> Get help at %{sp_name}',
-          }}
-        >
-          <ServiceProviderContextProvider
-            value={{
-              name: 'Example App',
-              failureToProofURL: 'https://example.com/?step=document_capture',
-              isLivenessRequired: false,
-            }}
-          >
-            <ReviewIssuesStep />
-          </ServiceProviderContextProvider>
-        </I18nContext.Provider>,
-      );
-
-      const help = getByText('Having trouble?').closest('a');
-
-      expect(help).to.be.ok();
-      expect(help.href).to.equal(
-        'https://example.com/?step=document_capture&location=review_issues_having_trouble',
-      );
-    });
-
     context('ial2', () => {
       it('renders with front and back inputs', () => {
-        const { getByLabelText } = render(
+        const { getByLabelText, getByRole } = render(
           <ServiceProviderContextProvider
             value={{
               name: 'Example App',
@@ -158,6 +192,7 @@ describe('document-capture/components/review-issues-step', () => {
             <ReviewIssuesStep />
           </ServiceProviderContextProvider>,
         );
+        userEvent.click(getByRole('button', { name: 'idv.failure.button.warning' }));
 
         expect(getByLabelText('doc_auth.headings.document_capture_front')).to.be.ok();
         expect(getByLabelText('doc_auth.headings.document_capture_back')).to.be.ok();
@@ -167,7 +202,7 @@ describe('document-capture/components/review-issues-step', () => {
 
     context('ial2 strict', () => {
       it('renders with front, back, and selfie inputs', () => {
-        const { getByLabelText } = render(
+        const { getByLabelText, getByRole } = render(
           <ServiceProviderContextProvider
             value={{
               name: 'Example App',
@@ -178,6 +213,7 @@ describe('document-capture/components/review-issues-step', () => {
             <ReviewIssuesStep />
           </ServiceProviderContextProvider>,
         );
+        userEvent.click(getByRole('button', { name: 'idv.failure.button.warning' }));
 
         expect(getByLabelText('doc_auth.headings.document_capture_front')).to.be.ok();
         expect(getByLabelText('doc_auth.headings.document_capture_back')).to.be.ok();

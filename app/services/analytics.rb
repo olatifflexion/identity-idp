@@ -14,6 +14,8 @@ class Analytics
       event_properties: attributes.except(:user_id),
       new_event: first_event_this_session?,
       new_session_path: first_path_visit_this_session?,
+      new_session_success_state: first_success_state_this_session?,
+      success_state: success_state_token(event),
       path: request&.path,
       user_id: attributes[:user_id] || user.uuid,
       locale: I18n.locale,
@@ -38,7 +40,11 @@ class Analytics
   def update_session_events_and_paths_visited_for_analytics(event)
     @session[:paths_visited] ||= {}
     @session[:events] ||= {}
+    @session[:success_states] ||= {}
     if request
+      token = success_state_token(event)
+      @session[:first_success_state] = !@session[:success_states].key?(token)
+      @session[:success_states][token] = true
       @session[:first_path_visit] = !@session[:paths_visited].key?(request.path)
       @session[:paths_visited][request.path] = true
     end
@@ -48,6 +54,14 @@ class Analytics
 
   def first_path_visit_this_session?
     @session[:first_path_visit]
+  end
+
+  def first_success_state_this_session?
+    @session[:first_success_state]
+  end
+
+  def success_state_token(event)
+    "#{request&.env&.dig('REQUEST_METHOD')}|#{request&.path}|#{event}"
   end
 
   def first_event_this_session?
@@ -128,6 +142,7 @@ class Analytics
   EVENT_DISAVOWAL_PASSWORD_RESET = 'Event disavowal password reset'.freeze
   EVENT_DISAVOWAL_TOKEN_INVALID = 'Event disavowal token invalid'.freeze
   EVENTS_VISIT = 'Events Page Visited'.freeze
+  EXTERNAL_REDIRECT = 'External Redirect'.freeze
   FORGET_ALL_BROWSERS_SUBMITTED = 'Forget All Browsers Submitted'.freeze
   FORGET_ALL_BROWSERS_VISITED = 'Forget All Browsers Visited'.freeze
   IDV_ADDRESS_VISIT = 'IdV: address visited'.freeze
@@ -254,6 +269,7 @@ class Analytics
   USER_REGISTRATION_PERSONAL_KEY_VISIT = 'User Registration: personal key visited'.freeze
   USER_REGISTRATION_PIV_CAC_DISABLED = 'User Registration: piv cac disabled'.freeze
   USER_REGISTRATION_PIV_CAC_SETUP_VISIT = 'User Registration: piv cac setup visited'.freeze
+  VENDOR_OUTAGE = 'Vendor Outage'.freeze
   WEBAUTHN_DELETED = 'WebAuthn Deleted'.freeze
   WEBAUTHN_SETUP_VISIT = 'WebAuthn Setup Visited'.freeze
 end

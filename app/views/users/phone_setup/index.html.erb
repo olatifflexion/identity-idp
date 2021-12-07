@@ -1,4 +1,7 @@
 <% title t('titles.phone_setup') %>
+
+<%= render(VendorOutageAlertComponent.new(vendors: [:sms, :voice])) %>
+
 <%= image_tag asset_url('2FA-voice.svg'), alt: '', width: 200, class: 'margin-bottom-2' %>
 
 <h1><%= t('titles.phone_setup') %></h1>
@@ -13,14 +16,14 @@
   <% end %>
 </p>
 
-<%= simple_form_for(
+<%= validated_form_for(
       @new_phone_form,
       html: { autocomplete: 'off', method: :patch },
       data: { international_phone_form: true },
       url: phone_setup_path,
     ) do |f| %>
 
-  <%= render PhoneInputComponent.new(form: f, required: true) %>
+  <%= render PhoneInputComponent.new(form: f, required: true, class: 'margin-bottom-4') %>
 
   <%= render 'users/shared/otp_delivery_preference_selection',
              form_obj: @new_phone_form %>

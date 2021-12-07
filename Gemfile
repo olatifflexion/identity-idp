@@ -8,13 +8,11 @@ gem 'rails', '~> 6.1.4'
 # Variables can be overridden for local dev in Gemfile-dev
 @hostdata_gem ||= { github: '18F/identity-hostdata', tag: 'v3.4.0' }
 @logging_gem ||= { github: '18F/identity-logging', tag: 'v0.1.0' }
-@saml_gem ||= { github: '18F/saml_idp', tag: 'v0.14.3-18f' }
-@telephony_gem ||= { github: '18f/identity-telephony', tag: 'v0.4.4' }
+@saml_gem ||= { github: '18F/saml_idp', tag: '0.15.0-18f' }
 @validations_gem ||= { github: '18F/identity-validations', tag: 'v0.7.1' }
 
 gem 'identity-hostdata', @hostdata_gem
 gem 'identity-logging', @logging_gem
-gem 'identity-telephony', @telephony_gem
 gem 'identity_validations', @validations_gem
 gem 'saml_idp', @saml_gem
 
@@ -22,6 +20,8 @@ gem 'ahoy_matey', '~> 3.0'
 gem 'autoprefixer-rails', '~> 10.0'
 gem 'aws-sdk-kms', '~> 1.4'
 gem 'aws-sdk-ses', '~> 1.6'
+gem 'aws-sdk-pinpoint'
+gem 'aws-sdk-pinpointsmsvoice'
 gem 'base32-crockford'
 gem 'bootsnap', '~> 1.9.0', require: false
 gem 'blueprinter', '~> 0.25.3'
@@ -31,7 +31,7 @@ gem 'devise', '~> 4.8'
 gem 'dotiw', '>= 4.0.1'
 gem 'faraday'
 gem 'foundation_emails'
-gem 'good_job', '~> 2.2.0'
+gem 'good_job', '~> 2.7.0'
 gem 'hashie', '~> 4.1'
 gem 'hiredis', '~> 0.6.0'
 gem 'http_accept_language'
@@ -40,6 +40,7 @@ gem 'local_time'
 gem 'lograge', '>= 0.11.2'
 gem 'lru_redux'
 gem 'maxminddb'
+gem 'multiset'
 gem 'net-sftp'
 gem 'newrelic_rpm', '~> 7.0'
 gem 'pg'
@@ -53,7 +54,7 @@ gem 'rack-timeout', require: false
 gem 'redacted_struct'
 gem 'redis', '>= 3.2.0'
 gem 'redis-namespace'
-gem 'redis-session-store', '>= 0.11.3'
+gem 'redis-session-store', github: '18f/redis-session-store', tag: 'v0.11.4-18f'
 gem 'retries'
 gem 'rotp', '~> 6.1'
 gem 'rqrcode'
@@ -69,7 +70,7 @@ gem 'strong_migrations', '>= 0.4.2'
 gem 'subprocess', require: false
 gem 'uglifier', '~> 4.2'
 gem 'valid_email', '>= 0.1.3'
-gem 'view_component', '~> 2.40.0', require: 'view_component/engine'
+gem 'view_component', '~> 2.43.1', require: 'view_component/engine'
 gem 'webauthn', '~> 2.1'
 gem 'webpacker', '~> 5.1'
 gem 'xmldsig', '~> 0.6'
@@ -105,8 +106,8 @@ group :development, :test do
   gem 'psych'
   gem 'puma'
   gem 'rspec-rails', '~> 4.0'
-  gem 'rubocop', '~> 1.18.2', require: false
-  gem 'rubocop-performance', '~> 1.11.2', require: false
+  gem 'rubocop', '~> 1.23.0', require: false
+  gem 'rubocop-performance', '~> 1.12.0', require: false
   gem 'rubocop-rails', '>= 2.5.2', require: false
 end
 
@@ -125,7 +126,6 @@ group :test do
   gem 'rack-test', '>= 1.1.0'
   gem 'rails-controller-testing', '>= 1.0.4'
   gem 'rspec-retry'
-  gem 'scss_lint', require: false
   gem 'shoulda-matchers', '~> 4.0', require: false
   gem 'webdrivers', '~> 4.0'
   gem 'webmock'

@@ -3,12 +3,15 @@ class IdentityConfig
   GIT_TAG = `git tag --points-at HEAD`.chomp.split("\n").first
   GIT_BRANCH = `git rev-parse --abbrev-ref HEAD`.chomp
 
+  VENDOR_STATUS_OPTIONS = %i[operational partial_outage full_outage]
+
   class << self
     attr_reader :store
   end
 
   CONVERTERS = {
     string: proc { |value| value.to_s },
+    symbol: proc { |value| value.to_sym },
     comma_separated_string_list: proc do |value|
       value.split(',')
     end,
@@ -44,11 +47,14 @@ class IdentityConfig
     @written_env = {}
   end
 
-  def add(key, type: :string, is_sensitive: false, allow_nil: false, options: {})
+  def add(key, type: :string, is_sensitive: false, allow_nil: false, enum: nil, options: {})
     value = @read_env[key]
 
     converted_value = CONVERTERS.fetch(type).call(value, options: options) if !value.nil?
     raise "#{key} is required but is not present" if converted_value.nil? && !allow_nil
+    if enum && !enum.include?(converted_value)
+      raise "unexpected #{key}: #{value}, expected one of #{enum}"
+    end
 
     @written_env[key] = converted_value
     @written_env
@@ -66,6 +72,7 @@ class IdentityConfig
     config.add(:aamva_sp_banlist_issuers, type: :json)
     config.add(:aamva_verification_request_timeout, type: :integer)
     config.add(:aamva_verification_url)
+    config.add(:all_redirect_uris_cache_duration_minutes, type: :integer)
     config.add(:account_reset_token_valid_for_days, type: :integer)
     config.add(:account_reset_wait_period_days, type: :integer)
     config.add(:acuant_maintenance_window_start, type: :timestamp, allow_nil: true)
@@ -94,7 +101,6 @@ class IdentityConfig
     config.add(:aws_logo_bucket, type: :string)
     config.add(:aws_region, type: :string)
     config.add(:backup_code_cost, type: :string)
-    config.add(:backup_code_skip_symmetric_encryption, type: :boolean)
     config.add(:country_phone_number_overrides, type: :json)
     config.add(:dashboard_api_token, type: :string)
     config.add(:dashboard_url, type: :string)
@@ -202,6 +208,11 @@ class IdentityConfig
     config.add(:otps_per_ip_limit, type: :integer)
     config.add(:otps_per_ip_period, type: :integer)
     config.add(:otps_per_ip_track_only_mode, type: :boolean)
+    config.add(:vendor_status_acuant, type: :symbol, enum: VENDOR_STATUS_OPTIONS)
+    config.add(:vendor_status_lexisnexis_instant_verify, type: :symbol, enum: VENDOR_STATUS_OPTIONS)
+    config.add(:vendor_status_lexisnexis_trueid, type: :symbol, enum: VENDOR_STATUS_OPTIONS)
+    config.add(:vendor_status_sms, type: :symbol, enum: VENDOR_STATUS_OPTIONS)
+    config.add(:vendor_status_voice, type: :symbol, enum: VENDOR_STATUS_OPTIONS)
     config.add(:outbound_connection_check_retry_count, type: :integer)
     config.add(:outbound_connection_check_timeout, type: :integer)
     config.add(:outbound_connection_check_url)
@@ -270,6 +281,7 @@ class IdentityConfig
     config.add(:saml_secret_rotation_enabled, type: :boolean)
     config.add(:scrypt_cost, type: :string)
     config.add(:secret_key_base, type: :string)
+    config.add(:seed_agreements_data, type: :boolean)
     config.add(:service_provider_request_ttl_hours, type: :integer)
     config.add(:session_check_delay, type: :integer)
     config.add(:session_check_frequency, type: :integer)
@@ -279,11 +291,13 @@ class IdentityConfig
     config.add(:session_total_duration_timeout_in_minutes, type: :integer)
     config.add(:show_user_attribute_deprecation_warnings, type: :boolean)
     config.add(:skip_encryption_allowed_list, type: :json)
+    config.add(:show_select_account_on_repeat_sp_visits, type: :boolean)
     config.add(:sp_context_needed_environment, type: :string)
     config.add(:sp_handoff_bounce_max_seconds, type: :integer)
     config.add(:sps_over_quota_limit_notify_email_list, type: :json)
     config.add(:state_tracking_enabled, type: :boolean)
     config.add(:telephony_adapter, type: :string)
+    config.add(:test_ssn_allowed_list, type: :comma_separated_string_list)
     config.add(:unauthorized_scope_enabled, type: :boolean)
     config.add(:use_dashboard_service_providers, type: :boolean)
     config.add(:use_kms, type: :boolean)

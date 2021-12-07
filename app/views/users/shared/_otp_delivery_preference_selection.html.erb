@@ -5,7 +5,7 @@
   form_name_tag_voice = form_name + "_otp_delivery_preference_voice"
 %>
 
-<div class="margin-bottom-4">
+<div class="js-otp-delivery-preferences margin-bottom-4">
   <fieldset class="margin-0 padding-0 border-0">
     <legend class="margin-bottom-1">
       <%= t('two_factor_authentication.otp_delivery_preference.title') %>
@@ -19,6 +19,7 @@
               form_name_label,
               :sms,
               form_obj.delivery_preference_sms?,
+              disabled: VendorStatus.new.vendor_outage?(:sms),
               class: 'js-otp-delivery-preference usa-radio__input usa-radio__input--bordered',
             ) %>
         <label class="usa-radio__label width-full" for="<%= form_name_tag_sms %>">
@@ -30,6 +31,7 @@
               form_name_label,
               :voice,
               form_obj.delivery_preference_voice?,
+              disabled: VendorStatus.new.vendor_outage?(:voice),
               class: 'js-otp-delivery-preference usa-radio__input usa-radio__input--bordered',
             ) %>
         <label class="usa-radio__label width-full" for="<%= form_name_tag_voice %>">

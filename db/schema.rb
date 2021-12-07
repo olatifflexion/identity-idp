@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_08_30_171713) do
+ActiveRecord::Schema.define(version: 2021_11_04_174749) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -71,15 +71,12 @@ ActiveRecord::Schema.define(version: 2021_08_30_171713) do
 
   create_table "backup_code_configurations", force: :cascade do |t|
     t.integer "user_id", null: false
-    t.string "code_fingerprint", default: "", null: false
-    t.string "encrypted_code", default: "", null: false
     t.datetime "used_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "salted_code_fingerprint"
     t.string "code_salt"
     t.string "code_cost"
-    t.index ["user_id", "code_fingerprint"], name: "index_bcc_on_user_id_code_fingerprint", unique: true
     t.index ["user_id", "created_at"], name: "index_backup_code_configurations_on_user_id_and_created_at"
     t.index ["user_id", "salted_code_fingerprint"], name: "index_backup_codes_on_user_id_and_salted_code_fingerprint"
   end
@@ -339,21 +336,6 @@ ActiveRecord::Schema.define(version: 2021_08_30_171713) do
     t.index ["issuer"], name: "index_integrations_on_issuer", unique: true
     t.index ["partner_account_id"], name: "index_integrations_on_partner_account_id"
     t.index ["service_provider_id"], name: "index_integrations_on_service_provider_id"
-  end
-
-  create_table "job_runs", force: :cascade do |t|
-    t.string "host", null: false
-    t.string "pid", null: false
-    t.datetime "finish_time"
-    t.string "job_name", null: false
-    t.string "result"
-    t.string "error"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["error"], name: "index_job_runs_on_error"
-    t.index ["host"], name: "index_job_runs_on_host"
-    t.index ["job_name", "created_at"], name: "index_job_runs_on_job_name_and_created_at"
-    t.index ["job_name", "finish_time"], name: "index_job_runs_on_job_name_and_finish_time"
   end
 
   create_table "letter_requests_to_usps_ftp_logs", force: :cascade do |t|

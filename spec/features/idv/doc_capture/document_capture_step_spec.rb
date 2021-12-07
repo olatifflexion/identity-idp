@@ -118,7 +118,7 @@ feature 'doc capture document capture step' do
     it 'logs events as the inherited user' do
       complete_doc_capture_steps_before_first_step(user)
       expect(fake_analytics).to have_logged_event(
-        Analytics::DOC_AUTH + ' visited',
+        'IdV: ' + "#{Analytics::DOC_AUTH} document_capture visited".downcase,
         step: 'document_capture',
         flow_path: 'hybrid',
       )
@@ -135,7 +135,7 @@ feature 'doc capture document capture step' do
           expect(fake_analytics).to have_logged_event(
             Analytics::RETURN_TO_SP_FAILURE_TO_PROOF,
             step: 'document_capture',
-            location: 'documents_having_trouble',
+            location: 'document_capture_troubleshooting_options',
           )
         end
       end
@@ -241,13 +241,6 @@ feature 'doc capture document capture step' do
       attach_and_submit_images
 
       expect(page).to have_current_path(next_step)
-      expect(fake_analytics).to have_logged_event(
-        Analytics::DOC_AUTH + ' submitted',
-        step: 'document_capture',
-        flow_path: 'hybrid',
-        doc_auth_result: 'Passed',
-        billed: true,
-      )
       expect(fake_analytics).to have_logged_event(
         'IdV: ' + "#{Analytics::DOC_AUTH} document_capture submitted".downcase,
         step: 'document_capture',

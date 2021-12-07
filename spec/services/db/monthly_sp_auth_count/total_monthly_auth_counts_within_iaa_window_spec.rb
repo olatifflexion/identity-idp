@@ -5,7 +5,12 @@ RSpec.describe Db::MonthlySpAuthCount::TotalMonthlyAuthCountsWithinIaaWindow do
 
   describe '.call' do
     subject(:result) do
-      Db::MonthlySpAuthCount::TotalMonthlyAuthCountsWithinIaaWindow.call(service_provider)
+      Db::MonthlySpAuthCount::TotalMonthlyAuthCountsWithinIaaWindow.call(
+        issuer: service_provider.issuer,
+        iaa_start_date: service_provider.iaa_start_date,
+        iaa_end_date: service_provider.iaa_end_date,
+        iaa: service_provider.iaa,
+      )
     end
 
     context 'when the SP does not have IAA start/end dates' do
@@ -58,13 +63,15 @@ RSpec.describe Db::MonthlySpAuthCount::TotalMonthlyAuthCountsWithinIaaWindow do
         )
       end
 
-      it 'counts auths across sp_return_logs and monthly_sp_auth_counts' do
+      it 'counts and uniqes auths across sp_return_logs and monthly_sp_auth_counts' do
         rows = [
           {
             year_month: partial_month_date.strftime('%Y%m'),
             ial: 1,
             issuer: service_provider.issuer,
             total_auth_count: 2,
+            unique_users: 1,
+            new_unique_users: 1,
             iaa: service_provider.iaa,
             iaa_start_date: iaa_range.begin.to_s,
             iaa_end_date: iaa_range.end.to_s,
@@ -74,13 +81,15 @@ RSpec.describe Db::MonthlySpAuthCount::TotalMonthlyAuthCountsWithinIaaWindow do
             ial: 1,
             issuer: service_provider.issuer,
             total_auth_count: 11,
+            unique_users: 1,
+            new_unique_users: 0,
             iaa: service_provider.iaa,
             iaa_start_date: iaa_range.begin.to_s,
             iaa_end_date: iaa_range.end.to_s,
           },
         ]
 
-        expect(result.map(&:symbolize_keys)).to match_array(rows)
+        expect(result).to match_array(rows)
       end
     end
 
@@ -88,7 +97,7 @@ RSpec.describe Db::MonthlySpAuthCount::TotalMonthlyAuthCountsWithinIaaWindow do
       let(:iaa_range) { Date.new(2021, 1, 15)..Date.new(2021, 1, 17) }
 
       it 'counts auths across sp_return_logs and monthly_sp_auth_counts' do
-        expect(result.map(&:symbolize_keys)).to match_array([])
+        expect(result).to match_array([])
       end
     end
   end

@@ -31,12 +31,14 @@ feature 'OIDC Authorization Confirmation' do
       user1
     end
 
-    it 'it confirms the user wants to continue to the SP after signing in again' do
-      sign_in_user(user1)
+    it 'it confirms the user wants to continue to SP with signin email after signing in again' do
+      second_email = create(:email_address, user: user1)
+      sign_in_user(user1, second_email.email)
       visit_idp_from_ial1_oidc_sp
       expect(current_url).to match(user_authorization_confirmation_path)
+      expect(page).to have_content second_email.email
 
-      continue_as(user1.email)
+      continue_as(second_email.email)
       expect(current_url).to match('http://localhost:7654/auth/result')
     end
 
@@ -52,6 +54,34 @@ feature 'OIDC Authorization Confirmation' do
       click_submit_default
 
       expect(current_url).to match('http://localhost:7654/auth/result')
+    end
+
+    it 'does not render the confirmation screen on a return visit to the SP by default' do
+      second_email = create(:email_address, user: user1)
+      sign_in_user(user1, second_email.email)
+
+      # first visit
+      visit_idp_from_ial1_oidc_sp
+      continue_as(second_email.email)
+
+      # second visit
+      visit_idp_from_ial1_oidc_sp
+      expect(current_url).to match('http://localhost:7654/auth/result')
+    end
+
+    it 'does render the confirmation screen on a return visit to the SP if configured' do
+      allow(IdentityConfig.store).to receive(:show_select_account_on_repeat_sp_visits).
+        and_return(true)
+      second_email = create(:email_address, user: user1)
+      sign_in_user(user1, second_email.email)
+
+      # first visit
+      visit_idp_from_ial1_oidc_sp
+      continue_as(second_email.email)
+
+      # second visit
+      visit_idp_from_ial1_oidc_sp
+      expect(current_path).to eq(user_authorization_confirmation_path)
     end
 
     it 'does not render an error if a user goes back after opting to switch accounts' do

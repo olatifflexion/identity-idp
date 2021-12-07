@@ -49,7 +49,11 @@ module Idv
 
     def redirect_to_next_step
       if phone_confirmation_required?
-        redirect_to idv_otp_delivery_method_url
+        if VendorStatus.new.all_phone_vendor_outage?
+          redirect_to vendor_outage_path(from: :idv_phone)
+        else
+          redirect_to idv_otp_delivery_method_url
+        end
       else
         redirect_to idv_review_url
       end
@@ -96,8 +100,6 @@ module Idv
       case reason
       when :warning
         idv_phone_errors_warning_url
-      when :timeout
-        idv_phone_errors_timeout_url
       when :jobfail
         idv_phone_errors_jobfail_url
       when :fail

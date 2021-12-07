@@ -54,6 +54,12 @@ module Upaya
     config.good_job.queues = IdentityConfig.store.good_job_queues
     # see config/initializers/job_configurations.rb for cron schedule
 
+    includes_star_queue = config.good_job.queues.split(';').any? do |name_threads|
+      name, threads = name_threads.split(':', 2)
+      name == '*'
+    end
+    raise 'good_job.queues does not contain *, but it should' if !includes_star_queue
+
     GoodJob.active_record_parent_class = 'WorkerJobApplicationRecord'
     GoodJob.retry_on_unhandled_error = false
     GoodJob.on_thread_error = ->(exception) { NewRelic::Agent.notice_error(exception) }
@@ -91,7 +97,14 @@ module Upaya
         origins do |source, _env|
           next if source == IdentityConfig.store.domain_name
 
-          ServiceProvider.pluck(:redirect_uris).flatten.compact.find do |uri|
+          redirect_uris = Rails.cache.fetch(
+            'all_service_provider_redirect_uris',
+            expires_in: IdentityConfig.store.all_redirect_uris_cache_duration_minutes.minutes,
+          ) do
+            ServiceProvider.pluck(:redirect_uris).flatten.compact
+          end
+
+          redirect_uris.find do |uri|
             split_uri = uri.split('//')
             protocol = split_uri[0]
             domain = split_uri[1].split('/')[0] if split_uri.size > 1
