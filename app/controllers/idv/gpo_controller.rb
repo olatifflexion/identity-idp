@@ -13,7 +13,10 @@ module Idv
       current_async_state = async_state
 
       if current_async_state.none?
-        analytics.track_event(Analytics::IDV_GPO_ADDRESS_VISITED)
+        analytics.track_event(
+          Analytics::IDV_GPO_ADDRESS_VISITED,
+          letter_already_sent: @presenter.letter_already_sent?,
+        )
         render :index
       elsif current_async_state.in_progress?
         render :wait
@@ -52,7 +55,8 @@ module Idv
     def update_tracking
       analytics.track_event(Analytics::IDV_GPO_ADDRESS_LETTER_REQUESTED)
       create_user_event(:gpo_mail_sent, current_user)
-      Db::ProofingComponent::Add.call(current_user.id, :address_check, 'gpo_letter')
+
+      ProofingComponent.create_or_find_by(user: current_user).update(address_check: 'gpo_letter')
     end
 
     def failure

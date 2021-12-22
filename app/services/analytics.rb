@@ -123,14 +123,14 @@ class Analytics
   ACCOUNT_DELETE_VISITED = 'Account Delete visited'.freeze
   ACCOUNT_DELETION = 'Account Deletion Requested'.freeze
   ACCOUNT_RESET_VISIT = 'Account deletion and reset visited'.freeze
-  ACCOUNT_VERIFICATION_SUBMITTED = 'Account verification submitted'
-  ACCOUNT_VERIFICATION_VISITED = 'Account verification visited'
   ACCOUNT_VISIT = 'Account Page Visited'.freeze
   ADD_EMAIL = 'Add Email: Email Submitted'.freeze
   ADD_EMAIL_CONFIRMATION = 'Add Email: Email Confirmation'.freeze
   ADD_EMAIL_CONFIRMATION_RESEND = 'Add Email: Email Confirmation requested due to invalid token'.freeze
   ADD_EMAIL_VISIT = 'Add Email: enter email visited'.freeze
   AUTHENTICATION_CONFIRMATION = 'Authentication Confirmation'.freeze
+  AUTHENTICATION_CONFIRMATION_CONTINUE = 'Authentication Confirmation: Continue selected'.freeze
+  AUTHENTICATION_CONFIRMATION_RESET = 'Authentication Confirmation: Reset selected'.freeze
   DOC_AUTH = 'Doc Auth'.freeze # visited or submitted is appended
   DOC_AUTH_ASYNC = 'Doc Auth Async'.freeze
   DOC_AUTH_WARNING = 'Doc Auth Warning'.freeze
@@ -151,6 +151,7 @@ class Analytics
   IDV_BASIC_INFO_SUBMITTED_FORM = 'IdV: basic info form submitted'.freeze
   IDV_BASIC_INFO_SUBMITTED_VENDOR = 'IdV: basic info vendor submitted'.freeze
   IDV_CANCELLATION = 'IdV: cancellation visited'.freeze
+  IDV_CANCELLATION_GO_BACK = 'IdV: cancellation go back'.freeze
   IDV_CANCELLATION_CONFIRMED = 'IdV: cancellation confirmed'.freeze
   IDV_COME_BACK_LATER_VISIT = 'IdV: come back later visited'.freeze
   IDV_DOC_AUTH_SUBMITTED_IMAGE_UPLOAD_FORM = 'IdV: doc auth image upload form submitted'.freeze
@@ -174,6 +175,7 @@ class Analytics
   IDV_PHONE_CONFIRMATION_OTP_VISIT = 'IdV: phone confirmation otp visited'.freeze
   IDV_PHONE_OTP_DELIVERY_SELECTION_SUBMITTED = 'IdV: Phone OTP Delivery Selection Submitted'.freeze
   IDV_PHONE_OTP_DELIVERY_SELECTION_VISIT = 'IdV: Phone OTP delivery Selection Visited'.freeze
+  IDV_PHONE_USE_DIFFERENT = 'IdV: use different phone number'.freeze
   IDV_PHONE_RECORD_VISIT = 'IdV: phone of record visited'.freeze
   IDV_REVIEW_COMPLETE = 'IdV: review complete'.freeze
   IDV_REVIEW_VISIT = 'IdV: review info visited'.freeze
@@ -181,6 +183,8 @@ class Analytics
   IDV_GPO_ADDRESS_LETTER_REQUESTED = 'IdV: USPS address letter requested'.freeze
   IDV_GPO_ADDRESS_SUBMITTED = 'IdV: USPS address submitted'.freeze
   IDV_GPO_ADDRESS_VISITED = 'IdV: USPS address visited'.freeze
+  IDV_GPO_VERIFICATION_SUBMITTED = 'IdV: GPO verification submitted'.freeze # Previously: "Account verification submitted"
+  IDV_GPO_VERIFICATION_VISITED = 'IdV: GPO verification visited'.freeze # Previously: "Account verification visited"
   INVALID_AUTHENTICITY_TOKEN = 'Invalid Authenticity Token'.freeze
   LOGOUT_INITIATED = 'Logout Initiated'.freeze
   MULTI_FACTOR_AUTH = 'Multi-Factor Authentication'.freeze
@@ -227,6 +231,7 @@ class Analytics
   RATE_LIMIT_TRIGGERED = 'Rate Limit Triggered'.freeze
   RESPONSE_TIMED_OUT = 'Response Timed Out'.freeze
   REMEMBERED_DEVICE_USED_FOR_AUTH = 'Remembered device used for authentication'.freeze
+  REMOTE_LOGOUT_INITIATED = 'Remote Logout initiated'.freeze
   RETURN_TO_SP_CANCEL = 'Return to SP: Cancelled'.freeze
   RETURN_TO_SP_FAILURE_TO_PROOF = 'Return to SP: Failed to proof'.freeze
   RULES_OF_USE_VISIT = 'Rules Of Use Visited'.freeze

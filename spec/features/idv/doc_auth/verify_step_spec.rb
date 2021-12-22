@@ -165,14 +165,11 @@ feature 'doc auth verify step' do
         success: true, errors: {}, context: { stages: [] },
       )
 
-      # rubocop:disable Layout/LineLength
       stub_const(
         'Idv::Steps::VerifyBaseStep::AAMVA_SUPPORTED_JURISDICTIONS',
         Idv::Steps::VerifyBaseStep::AAMVA_SUPPORTED_JURISDICTIONS +
           [DocAuth::Mock::ResultResponseBuilder::DEFAULT_PII_FROM_DOC[:state_id_jurisdiction]],
       )
-      # rubocop:enable Layout/LineLength
-
       sign_in_and_2fa_user
       complete_doc_auth_steps_before_verify_step
       click_idv_continue
@@ -182,6 +179,7 @@ feature 'doc auth verify step' do
         should_proof_state_id: true,
         document_expired: nil,
         trace_id: anything,
+        flow_path: 'standard',
       )
     end
   end
@@ -194,14 +192,11 @@ feature 'doc auth verify step' do
         success: true, errors: {}, context: { stages: [] },
       )
 
-      # rubocop:disable Layout/LineLength
       stub_const(
         'Idv::Steps::VerifyBaseStep::AAMVA_SUPPORTED_JURISDICTIONS',
         Idv::Steps::VerifyBaseStep::AAMVA_SUPPORTED_JURISDICTIONS -
           [DocAuth::Mock::ResultResponseBuilder::DEFAULT_PII_FROM_DOC[:state_id_jurisdiction]],
       )
-      # rubocop:enable Layout/LineLength
-
       sign_in_and_2fa_user
       complete_doc_auth_steps_before_verify_step
       click_idv_continue
@@ -211,6 +206,7 @@ feature 'doc auth verify step' do
         should_proof_state_id: false,
         document_expired: nil,
         trace_id: anything,
+        flow_path: 'standard',
       )
       expect(DocAuthLog.find_by(user_id: user.id).aamva).to be_nil
     end
@@ -237,6 +233,7 @@ feature 'doc auth verify step' do
         should_proof_state_id: false,
         document_expired: nil,
         trace_id: anything,
+        flow_path: 'standard',
       )
     end
   end

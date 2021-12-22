@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   SamlEndpoint.suffixes.each do |suffix|
     get "/api/saml/metadata#{suffix}" => 'saml_idp#metadata', format: false
     match "/api/saml/logout#{suffix}" => 'saml_idp#logout', via: %i[get post delete]
+    match "/api/saml/remotelogout#{suffix}" => 'saml_idp#remotelogout', via: %i[get post delete]
     # JS-driven POST redirect route to preserve existing session
     post "/api/saml/auth#{suffix}" => 'saml_post#auth'
     # actual SAML handling POST route
@@ -243,15 +244,14 @@ Rails.application.routes.draw do
     get '/sign_up/verify_email' => 'sign_up/emails#show', as: :sign_up_verify_email
     get '/sign_up/completed' => 'sign_up/completions#show', as: :sign_up_completed
     post '/sign_up/completed' => 'sign_up/completions#update'
-    get '/user_authorization_confirmation' => 'users/authorization_confirmation#show'
-    put '/user_authorization_confirmation/reset' => 'users/authorization_confirmation#update', as: :reset_user_authorization
+    get '/user_authorization_confirmation' => 'users/authorization_confirmation#new'
+    post '/user_authorization_confirmation' => 'users/authorization_confirmation#create'
+    match '/user_authorization_confirmation/reset' => 'users/authorization_confirmation#destroy', as: :reset_user_authorization, via: %i[put delete]
     get '/sign_up/cancel/' => 'sign_up/cancellations#new', as: :sign_up_cancel
 
     get '/redirect/return_to_sp/cancel' => 'redirect/return_to_sp#cancel', as: :return_to_sp_cancel
     get '/redirect/return_to_sp/failure_to_proof' => 'redirect/return_to_sp#failure_to_proof', as: :return_to_sp_failure_to_proof
     get '/redirect/help_center' => 'redirect/help_center#show', as: :help_center_redirect
-    get '/return_to_sp/cancel' => redirect('/redirect/return_to_sp/cancel') # Temporary: Remove after RC169
-    get '/return_to_sp/failure_to_proof' => redirect('/redirect/return_to_sp/failure_to_proof') # Temporary: Remove after RC169
 
     match '/sign_out' => 'sign_out#destroy', via: %i[get post delete]
 
@@ -287,6 +287,7 @@ Rails.application.routes.draw do
       get '/session/errors/throttled' => 'session_errors#throttled'
       delete '/session' => 'sessions#destroy'
       get '/cancel/' => 'cancellations#new', as: :cancel
+      put '/cancel' => 'cancellations#update'
       delete '/cancel' => 'cancellations#destroy'
       get '/address' => 'address#new'
       post '/address' => 'address#update'
@@ -305,8 +306,8 @@ Rails.application.routes.draw do
       put '/capture_doc/:step' => 'capture_doc#update'
     end
 
-    get '/account/verify' => 'users/verify_account#index', as: :verify_account
-    post '/account/verify' => 'users/verify_account#create'
+    get '/account/verify' => 'idv/gpo_verify#index', as: :idv_gpo_verify
+    post '/account/verify' => 'idv/gpo_verify#create'
     if FeatureManagement.enable_gpo_verification?
       scope '/verify', module: 'idv', as: 'idv' do
         get '/usps' => 'gpo#index', as: :gpo
