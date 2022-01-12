@@ -25,7 +25,7 @@ class VerifyPasswordForm
 
   def validate_password
     return if valid_password?
-    errors.add :password, :password_incorrect
+    errors.add :password, :password_incorrect, type: :password_incorrect
   end
 
   def valid_password?
@@ -40,6 +40,6 @@ class VerifyPasswordForm
   end
 
   def profile
-    @_profile ||= user.decorate.password_reset_profile
+    @profile ||= user.decorate.password_reset_profile
   end
 end

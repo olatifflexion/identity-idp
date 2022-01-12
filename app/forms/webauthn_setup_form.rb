@@ -57,9 +57,9 @@ class WebauthnSetupForm
   def name_is_unique
     return unless WebauthnConfiguration.exists?(user_id: @user.id, name: @name)
     if @platform_authenticator
-      errors.add :name, I18n.t('errors.webauthn_platform_setup.unique_name')
+      errors.add :name, I18n.t('errors.webauthn_platform_setup.unique_name'), type: :unique_name
     else
-      errors.add :name, I18n.t('errors.webauthn_setup.unique_name')
+      errors.add :name, I18n.t('errors.webauthn_setup.unique_name'), type: :unique_name
     end
     @name_taken = true
   end
@@ -79,12 +79,12 @@ class WebauthnSetupForm
       errors.add :name, I18n.t(
         'errors.webauthn_platform_setup.attestation_error',
         link: MarketingSite.contact_url,
-      )
+      ), type: :attestation_error
     else
       errors.add :name, I18n.t(
         'errors.webauthn_setup.attestation_error',
         link: MarketingSite.contact_url,
-      )
+      ), type: :attestation_error
     end
     false
   end
@@ -102,9 +102,14 @@ class WebauthnSetupForm
   end
 
   def extra_analytics_attributes
+    auth_method = if platform_authenticator?
+                    'webauthn_platform'
+                  else
+                    'webauthn'
+                  end
     {
       mfa_method_counts: MfaContext.new(user).enabled_two_factor_configuration_counts_hash,
-      multi_factor_auth_method: 'webauthn',
+      multi_factor_auth_method: auth_method,
       pii_like_keypaths: [[:mfa_method_counts, :phone]],
     }
   end

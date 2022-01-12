@@ -24,7 +24,7 @@ class VerifyPersonalKeyForm
 
   # @return [Pii::Attributes,nil]
   def decrypted_pii
-    @_pii ||= password_reset_profile.recover_pii(personal_key)
+    @decrypted_pii ||= password_reset_profile.recover_pii(personal_key)
   end
 
   private
@@ -35,7 +35,7 @@ class VerifyPersonalKeyForm
 
   def validate_personal_key
     return check_personal_key if personal_key_decrypts?
-    errors.add :personal_key, :personal_key_incorrect
+    errors.add :personal_key, :personal_key_incorrect, type: :personal_key
   end
 
   def reset_sensitive_fields

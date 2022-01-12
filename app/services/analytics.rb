@@ -157,13 +157,15 @@ class Analytics
   IDV_DOC_AUTH_SUBMITTED_IMAGE_UPLOAD_FORM = 'IdV: doc auth image upload form submitted'.freeze
   IDV_DOC_AUTH_SUBMITTED_IMAGE_UPLOAD_VENDOR = 'IdV: doc auth image upload vendor submitted'.freeze
   IDV_DOC_AUTH_SUBMITTED_PII_VALIDATION = 'IdV: doc auth image upload vendor pii validation'.freeze
-  IDV_DOWNLOAD_PERSONAL_KEY = 'IdV: download personal key'.freeze
   IDV_FINAL = 'IdV: final resolution'.freeze
   IDV_FORGOT_PASSWORD = 'IdV: forgot password visited'.freeze
   IDV_FORGOT_PASSWORD_CONFIRMED = 'IdV: forgot password confirmed'.freeze
   IDV_INTRO_VISIT = 'IdV: intro visited'.freeze
   IDV_JURISDICTION_VISIT = 'IdV: jurisdiction visited'.freeze
   IDV_JURISDICTION_FORM = 'IdV: jurisdiction form submitted'.freeze
+  IDV_PERSONAL_KEY_DOWNLOADED = 'IdV: personal key downloaded'.freeze # previously "IdV: download personal key"
+  IDV_PERSONAL_KEY_VISITED = 'IdV: personal key visited'.freeze
+  IDV_PERSONAL_KEY_SUBMITTED = 'IdV: personal key submitted'.freeze
   IDV_PHONE_CONFIRMATION_FORM = 'IdV: phone confirmation form'.freeze
   IDV_PHONE_CONFIRMATION_VENDOR = 'IdV: phone confirmation vendor'.freeze
   IDV_PHONE_CONFIRMATION_OTP_RATE_LIMIT_ATTEMPTS = 'Idv: Phone OTP attempts rate limited'.freeze
@@ -229,6 +231,10 @@ class Analytics
   PROOFING_DOCUMENT_TIMEOUT = 'Proofing Document Timeout'.freeze
   PROOFING_RESOLUTION_TIMEOUT = 'Proofing Resolution Timeout'.freeze
   RATE_LIMIT_TRIGGERED = 'Rate Limit Triggered'.freeze
+  REPORT_REGISTERED_USERS_COUNT = 'Report Registered Users Count'.freeze
+  REPORT_IAL1_USERS_LINKED_TO_SPS_COUNT = 'Report IAL1 Users Linked to SPs Count'.freeze
+  REPORT_IAL2_USERS_LINKED_TO_SPS_COUNT= 'Report IAL2 Users Linked to SPs Count'.freeze
+  REPORT_SP_USER_COUNTS = 'Report SP User Counts'.freeze
   RESPONSE_TIMED_OUT = 'Response Timed Out'.freeze
   REMEMBERED_DEVICE_USED_FOR_AUTH = 'Remembered device used for authentication'.freeze
   REMOTE_LOGOUT_INITIATED = 'Remote Logout initiated'.freeze
