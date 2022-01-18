@@ -6,8 +6,8 @@
         aria: { describedby: (description_id = SecureRandom.uuid),
                 labelledby: (label_id = SecureRandom.uuid) }
       ) do %>
-    <div class="modal-center">
-      <div class="modal-content" tabindex='-1'>
+    <div class="modal-center" tabindex='-1'>
+      <div class="modal-content" >
         <%= yield label_id, description_id %>
       </div>
     </div>
