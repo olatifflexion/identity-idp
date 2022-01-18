@@ -4,11 +4,10 @@
         role: 'dialog',
         class: 'padding-x-2 padding-y-6 modal',
         aria: { describedby: (description_id = SecureRandom.uuid),
-                labelledby: (label_id = SecureRandom.uuid) },
-        tabindex: '-1',
+                labelledby: (label_id = SecureRandom.uuid) }
       ) do %>
     <div class="modal-center">
-      <div class="modal-content">
+      <div class="modal-content" tabindex='-1'>
         <%= yield label_id, description_id %>
       </div>
     </div>
