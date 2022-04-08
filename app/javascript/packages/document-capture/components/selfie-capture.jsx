@@ -10,8 +10,8 @@ import {
 } from 'react';
 import { Icon } from '@18f/identity-components';
 import { useI18n } from '@18f/identity-react-i18n';
+import { useIfStillMounted } from '@18f/identity-react-hooks';
 import FileImage from './file-image';
-import useIfStillMounted from '../hooks/use-if-still-mounted';
 import useInstanceId from '../hooks/use-instance-id';
 import useFocusFallbackRef from '../hooks/use-focus-fallback-ref';
 import AppContext from '../context/app';
@@ -97,7 +97,8 @@ function SelfieCapture({ value, onChange, errorMessage, className }, ref) {
       return;
     }
 
-    navigator.permissions.query({ name: 'camera' }).then(
+    // Type-casting necessary due to: https://github.com/microsoft/TypeScript/issues/33923
+    navigator.permissions.query({ name: /** @type {PermissionName} */ ('camera') }).then(
       ifStillMounted((/** @type {PermissionStatus} */ result) => {
         if (result.state === 'granted') {
           startCapture();

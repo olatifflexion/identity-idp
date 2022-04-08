@@ -16,7 +16,7 @@
 }
 
 .i18n-mobile-dropdown {
-  background-color: $blue-light;
+  background-color: color('primary-lighter');
   bottom: 100%;
   left: 0;
   position: absolute;
@@ -24,21 +24,17 @@
 }
 
 .i18n-desktop-toggle {
+  position: relative;
+
   &.focused {
-    background-color: $blue;
+    background-color: color('primary');
     border-radius: 0;
     margin-bottom: 0;
     margin-top: 0;
-
-    button {
-      padding-bottom: 12px;
-      padding-top: 12px;
-    }
   }
 }
 
 .i18n-desktop-dropdown {
-  background-color: $blue;
   bottom: 100%;
   left: -1px;
   position: absolute;
@@ -50,6 +46,6 @@
 }
 
 .language-mobile-button {
-  background-color: $blue-light;
+  background-color: color('primary-lighter');
   border: 0;
 }

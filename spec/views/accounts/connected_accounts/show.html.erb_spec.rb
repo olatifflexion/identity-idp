@@ -7,8 +7,8 @@ describe 'accounts/connected_accounts/show.html.erb' do
     allow(user).to receive(:decorate).and_return(decorated_user)
     allow(view).to receive(:current_user).and_return(user)
     assign(
-      :view_model,
-      AccountShow.new(
+      :presenter,
+      AccountShowPresenter.new(
         decrypted_pii: nil, personal_key: nil, decorated_user: decorated_user,
         sp_session_request_url: nil, sp_name: nil,
         locked_for_session: false
@@ -29,7 +29,7 @@ describe 'accounts/connected_accounts/show.html.erb' do
 
     it 'renders' do
       expect { render }.to_not raise_error
-      expect(rendered).to match '</time>'
+      expect(rendered).to match '</lg-time>'
       expect(rendered).to_not include('&lt;')
     end
   end

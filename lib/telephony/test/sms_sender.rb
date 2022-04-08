@@ -1,6 +1,7 @@
 module Telephony
   module Test
     class SmsSender
+      # rubocop:disable Lint/UnusedMethodArgument
       def send(message:, to:, country_code:, otp: nil)
         error = ErrorSimulator.new.error_for_number(to)
         if error.nil?
@@ -12,6 +13,7 @@ module Telephony
           )
         end
       end
+      # rubocop:enable Lint/UnusedMethodArgument
 
       def phone_info(phone_number)
         error = ErrorSimulator.new.error_for_number(phone_number)
@@ -20,6 +22,13 @@ module Telephony
           PhoneNumberInfo.new(
             type: :voip,
             carrier: 'Test VOIP Carrier',
+          )
+        # Mask opt out errors because we do a phone_info check before trying to send
+        # so it would prevent us from getting an opt out error where it would actually appaer
+        when OptOutError
+          PhoneNumberInfo.new(
+            type: :mobile,
+            carrier: 'Test Mobile Carrier',
           )
         when TelephonyError
           PhoneNumberInfo.new(

@@ -13,6 +13,7 @@ describe TwoFactorAuthentication::OtpVerificationController do
           TwoFactorAuthCode::PhoneDeliveryPresenter.new(
             data: presenter_data,
             view: ActionController::Base.new.view_context,
+            service_provider: nil,
           )
           allow(FeatureManagement).to receive(:prefill_otp_codes?).and_return(true)
 
@@ -207,7 +208,7 @@ describe TwoFactorAuthentication::OtpVerificationController do
             params: {
               code: subject.current_user.direct_otp,
               otp_delivery_preference: 'sms',
-              remember_device: 'true',
+              remember_device: '1',
             },
           )
 
@@ -437,7 +438,7 @@ describe TwoFactorAuthentication::OtpVerificationController do
             params: {
               code: subject.current_user.direct_otp,
               otp_delivery_preference: 'sms',
-              remember_device: 'true',
+              remember_device: '1',
             },
           )
 

@@ -78,12 +78,19 @@ feature 'doc auth verify step' do
   end
 
   it 'does not proceed to the next page if resolution fails' do
+    allow_any_instance_of(ApplicationController).to receive(:analytics).and_return(fake_analytics)
+
     sign_in_and_2fa_user
     complete_doc_auth_steps_before_ssn_step
     fill_out_ssn_form_with_ssn_that_fails_resolution
     click_idv_continue
     click_idv_continue
 
+    expect(fake_analytics).to have_logged_event(
+      'IdV: doc auth warning visited',
+      step_name: 'Idv::Steps::VerifyWaitStepShow',
+      remaining_attempts: 4,
+    )
     expect(page).to have_current_path(idv_session_errors_warning_path)
 
     click_on t('idv.failure.button.warning')
@@ -92,34 +99,24 @@ feature 'doc auth verify step' do
   end
 
   it 'does not proceed to the next page if resolution raises an exception' do
+    allow_any_instance_of(ApplicationController).to receive(:analytics).and_return(fake_analytics)
+
     sign_in_and_2fa_user
     complete_doc_auth_steps_before_ssn_step
     fill_out_ssn_form_with_ssn_that_raises_exception
     click_idv_continue
     click_idv_continue
 
+    expect(fake_analytics).to have_logged_event(
+      'IdV: doc auth exception visited',
+      step_name: 'Idv::Steps::VerifyWaitStepShow',
+      remaining_attempts: 5,
+    )
     expect(page).to have_current_path(idv_session_errors_exception_path)
 
     click_on t('idv.failure.button.warning')
 
     expect(page).to have_current_path(idv_doc_auth_verify_step)
-  end
-
-  context 'resolution proofing raises a timeout exception' do
-    before do
-      allow_any_instance_of(Proofing::Mock::StateIdMockClient).to receive(:execute_proof).and_raise(
-        Proofing::TimeoutError.new(
-          'ExceptionId: 0047, ExceptionText: MVA did not respond in a timely fashion',
-        ),
-      )
-    end
-
-    it 'does not proceed to the next page if resolution raises a timeout exception' do
-      click_idv_continue
-
-      expect(page).to have_current_path(idv_doc_auth_verify_step)
-      expect(page).to have_content(t('idv.failure.timeout'))
-    end
   end
 
   it 'throttles resolution and continues when it expires' do
@@ -138,7 +135,7 @@ feature 'doc auth verify step' do
     expect(fake_analytics).to have_logged_event(
       Analytics::THROTTLER_RATE_LIMIT_TRIGGERED,
       throttle_type: :idv_resolution,
-      step_name: Idv::Steps::VerifyWaitStepShow,
+      step_name: 'Idv::Steps::VerifyWaitStepShow',
     )
 
     travel_to(IdentityConfig.store.idv_attempt_window_in_hours.hours.from_now + 1) do
@@ -175,11 +172,7 @@ feature 'doc auth verify step' do
       click_idv_continue
 
       expect(agent).to have_received(:proof_resolution).with(
-        anything,
-        should_proof_state_id: true,
-        document_expired: nil,
-        trace_id: anything,
-        flow_path: 'standard',
+        anything, should_proof_state_id: true, trace_id: anything
       )
     end
   end
@@ -202,11 +195,7 @@ feature 'doc auth verify step' do
       click_idv_continue
 
       expect(agent).to have_received(:proof_resolution).with(
-        anything,
-        should_proof_state_id: false,
-        document_expired: nil,
-        trace_id: anything,
-        flow_path: 'standard',
+        anything, should_proof_state_id: false, trace_id: anything
       )
       expect(DocAuthLog.find_by(user_id: user.id).aamva).to be_nil
     end
@@ -229,16 +218,12 @@ feature 'doc auth verify step' do
       click_idv_continue
 
       expect(agent).to have_received(:proof_resolution).with(
-        anything,
-        should_proof_state_id: false,
-        document_expired: nil,
-        trace_id: anything,
-        flow_path: 'standard',
+        anything, should_proof_state_id: false, trace_id: anything
       )
     end
   end
 
-  context 'async timed out' do
+  context 'async missing' do
     it 'allows resubmitting form' do
       sign_in_and_2fa_user
       complete_doc_auth_steps_before_verify_step
@@ -251,7 +236,7 @@ feature 'doc auth verify step' do
 
       click_continue
       # FLAKE: this errors due to some race condition, likely due to polling in the browser
-      expect(fake_analytics).to have_logged_event(Analytics::PROOFING_RESOLUTION_TIMEOUT, {})
+      expect(fake_analytics).to have_logged_event(Analytics::PROOFING_RESOLUTION_RESULT_MISSING, {})
       expect(page).to have_content(t('idv.failure.timeout'))
       expect(page).to have_current_path(idv_doc_auth_verify_step)
       allow(DocumentCaptureSession).to receive(:find_by).and_call_original
@@ -315,7 +300,10 @@ feature 'doc auth verify step' do
 
         click_continue
         # FLAKE: this errors due to some race condition, likely due to polling in the browser
-        # expect(fake_analytics).to have_logged_event(Analytics::PROOFING_RESOLUTION_TIMEOUT, {})
+        # expect(fake_analytics).to have_logged_event(
+        #   Analytics::PROOFING_RESOLUTION_RESULT_MISSING,
+        #   {},
+        # )
         expect(page).to have_content(t('idv.failure.timeout'))
         expect(page).to have_current_path(idv_doc_auth_verify_step)
         allow(DocumentCaptureSession).to receive(:find_by).and_call_original

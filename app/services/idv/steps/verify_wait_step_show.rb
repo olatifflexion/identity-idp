@@ -16,11 +16,11 @@ module Idv
           mark_step_incomplete(:verify)
         elsif current_async_state.in_progress?
           nil
-        elsif current_async_state.timed_out?
+        elsif current_async_state.missing?
           flash[:error] = I18n.t('idv.failure.timeout')
           delete_async
           mark_step_incomplete(:verify)
-          @flow.analytics.track_event(Analytics::PROOFING_RESOLUTION_TIMEOUT)
+          @flow.analytics.track_event(Analytics::PROOFING_RESOLUTION_RESULT_MISSING)
         elsif current_async_state.done?
           async_state_done(current_async_state)
         end
@@ -39,7 +39,7 @@ module Idv
         )
 
         if form_response.success?
-          response = check_ssn(flow_session[:pii_from_doc]) if form_response.success?
+          response = check_ssn if form_response.success?
           form_response = form_response.merge(response)
         end
         summarize_result_and_throttle_failures(form_response)
@@ -58,10 +58,10 @@ module Idv
         dcs_uuid = flow_session[verify_step_document_capture_session_uuid_key]
         dcs = DocumentCaptureSession.find_by(uuid: dcs_uuid)
         return ProofingSessionAsyncResult.none if dcs_uuid.nil?
-        return ProofingSessionAsyncResult.timed_out if dcs.nil?
+        return ProofingSessionAsyncResult.missing if dcs.nil?
 
         proofing_job_result = dcs.load_proofing_result
-        return ProofingSessionAsyncResult.timed_out if proofing_job_result.nil?
+        return ProofingSessionAsyncResult.missing if proofing_job_result.nil?
 
         proofing_job_result
       end

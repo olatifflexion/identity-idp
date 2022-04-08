@@ -34,7 +34,7 @@ module TwoFactorAuthenticatableMethods # rubocop:disable Metrics/ModuleLength
       decorated_user,
     )
     sign_out
-    render_full_width('shared/_failure', locals: { presenter: presenter })
+    render_full_width('two_factor_authentication/_locked', locals: { presenter: presenter })
   end
 
   def require_current_password
@@ -252,7 +252,6 @@ module TwoFactorAuthenticatableMethods # rubocop:disable Metrics/ModuleLength
       otp_delivery_preference: two_factor_authentication_method,
       otp_make_default_number: selected_otp_make_default_number,
       voice_otp_delivery_unsupported: voice_otp_delivery_unsupported?,
-      reenter_phone_number_path: reenter_phone_number_path,
       unconfirmed_phone: unconfirmed_phone?,
       account_reset_token: account_reset_token }.merge(generic_data)
   end
@@ -282,7 +281,7 @@ module TwoFactorAuthenticatableMethods # rubocop:disable Metrics/ModuleLength
 
   def display_phone_to_deliver_to
     if UserSessionContext.authentication_context?(context)
-      masked_number(phone_configuration.phone)
+      phone_configuration.masked_phone
     else
       user_session[:unconfirmed_phone]
     end
@@ -301,11 +300,6 @@ module TwoFactorAuthenticatableMethods # rubocop:disable Metrics/ModuleLength
     current_user.decorate
   end
 
-  def reenter_phone_number_path
-    locale = LinkLocaleResolver.locale
-    phone_setup_path(locale: locale)
-  end
-
   def confirmation_for_add_phone?
     UserSessionContext.confirmation_context?(context) && user_fully_authenticated?
   end
@@ -320,16 +314,12 @@ module TwoFactorAuthenticatableMethods # rubocop:disable Metrics/ModuleLength
     TwoFactorAuthCode.const_get("#{type}_delivery_presenter".classify).new(
       data: data,
       view: view_context,
+      service_provider: current_sp,
       remember_device_default: remember_device_default,
     )
   end
 
   def phone_configuration
     MfaContext.new(current_user).phone_configuration(user_session[:phone_id])
-  end
-
-  def masked_number(number)
-    return '' if number.blank?
-    "***-***-#{number[-4..-1]}"
   end
 end

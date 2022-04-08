@@ -2,7 +2,7 @@ require 'saml_idp_constants'
 
 ## GET /api/saml/auth helper methods
 module SamlAuthHelper
-  def saml_settings(overrides: {}, security_overrides: {})
+  def saml_settings(overrides: {})
     settings = OneLogin::RubySaml::Settings.new
 
     # SP settings
@@ -74,6 +74,14 @@ module SamlAuthHelper
     )
   end
 
+  def saml_remote_logout_request_url(overrides: {}, params: {})
+    overrides[:idp_slo_target_url] = "http://#{IdentityConfig.store.domain_name}/api/saml/remotelogout2022"
+    logout_request.create(
+      saml_settings(overrides: overrides),
+      params,
+    )
+  end
+
   def visit_saml_authn_request_url(overrides: {}, params: {})
     authn_request_url = saml_authn_request_url(overrides: overrides, params: params)
     visit authn_request_url
@@ -82,6 +90,11 @@ module SamlAuthHelper
   def visit_saml_logout_request_url(overrides: {}, params: {})
     logout_request_url = saml_logout_request_url(overrides: overrides, params: params)
     visit logout_request_url
+  end
+
+  def send_saml_remote_logout_request(overrides: {}, params: {})
+    remote_logout_request_url = saml_remote_logout_request_url(overrides: overrides, params: params)
+    page.driver.post remote_logout_request_url
   end
 
   def saml_get_auth(settings)
@@ -111,6 +124,10 @@ module SamlAuthHelper
   end
 
   public
+
+  def sp1
+    build(:service_provider, issuer: sp1_issuer)
+  end
 
   def sp1_issuer
     'https://rp1.serviceprovider.com/auth/saml/metadata'
@@ -162,7 +179,7 @@ module SamlAuthHelper
 
     IdentityLinker.new(
       user,
-      settings.issuer,
+      build(:service_provider, issuer: settings.issuer),
     ).link_identity(
       ial: ial2_requested?(settings) ? true : nil,
       verified_attributes: ['email'],

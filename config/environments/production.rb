@@ -4,6 +4,7 @@ Rails.application.configure do
   config.eager_load = true
   config.consider_all_requests_local = false
   config.action_controller.perform_caching = true
+  config.force_ssl = true
 
   config.asset_host = proc do |_source, request|
     # we want precompiled assets to have domain-agnostic URLs
@@ -13,6 +14,7 @@ Rails.application.configure do
   config.assets.js_compressor = :uglifier
   config.assets.compile = false
   config.assets.digest = true
+  config.assets.gzip = false
   config.i18n.fallbacks = true
   config.active_support.deprecation = :notify
   config.active_record.dump_schema_after_migration = false

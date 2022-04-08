@@ -11,9 +11,7 @@
 
 <%= render(VendorOutageAlertComponent.new(vendors: [:sms, :voice], context: :idv)) %>
 
-<h1 class="margin-y-0">
-  <%= t('idv.titles.otp_delivery_method') %>
-</h1>
+<%= render PageHeadingComponent.new.with_content(t('idv.titles.otp_delivery_method')) %>
 <p class="margin-top-1">
   <%= t('idv.messages.otp_delivery_method.phone_number_html', phone: @idv_phone) %>
 </p>
@@ -36,7 +34,7 @@
     <label for="otp_delivery_preference_sms" class="usa-radio__label">
       <%= t('two_factor_authentication.otp_delivery_preference.sms') %>
       <span class="usa-radio__label-description">
-        <%= t('two_factor_authentication.two_factor_choice_options.sms_info_html') %>
+        <%= t('two_factor_authentication.two_factor_choice_options.sms_info') %>
       </span>
     </label>
 
@@ -50,7 +48,7 @@
     <label for="otp_delivery_preference_voice" class="usa-radio__label">
       <%= t('two_factor_authentication.otp_delivery_preference.voice') %>
       <span class="usa-radio__label-description">
-        <%= t('two_factor_authentication.two_factor_choice_options.voice_info_html') %>
+        <%= t('two_factor_authentication.two_factor_choice_options.voice_info') %>
       </span>
     </label>
   </fieldset>

@@ -1,6 +1,6 @@
 <header aria-label="banner">
   <%= render 'shared/no_pii_banner' if FeatureManagement.show_no_pii_banner? %>
-  <section class="usa-banner" aria-label="Official government website">
+  <section class="usa-banner" aria-label="<%= t('shared.banner.landmark_label') %>">
     <div class="usa-accordion">
       <div class="usa-banner__header">
         <div class="usa-banner__inner">
@@ -22,7 +22,7 @@
         </div>
       </div>
       <div class="usa-banner__content usa-accordion__content" id="gov-banner">
-        <%= nonced_javascript_tag do %>
+        <%= backwards_compatible_javascript_tag do %>
           document.getElementById('gov-banner').setAttribute('hidden', '');
         <% end %>
         <div class="grid-row grid-gap-lg">
@@ -56,9 +56,9 @@
       </div>
     </div>
   </section>
-  <nav aria-label="main-navigation">
-    <% if content_for?(:nav) %>
-      <%= yield(:nav) %>
+  <div class="page-header<%= ' page-header--basic' if !content_for?(:header) %>">
+    <% if content_for?(:header) %>
+      <%= yield(:header) %>
     <% else %>
       <% if decorated_session.sp_name %>
         <%= render 'shared/nav_branded' %>
@@ -66,5 +66,5 @@
         <%= render 'shared/nav_lite' %>
       <% end %>
     <% end %>
-  </nav>
+  </div>
 </header>

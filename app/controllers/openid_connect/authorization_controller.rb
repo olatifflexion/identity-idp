@@ -12,7 +12,8 @@ module OpenidConnect
     before_action :sign_out_if_prompt_param_is_login_and_user_is_signed_in, only: [:index]
     before_action :store_request, only: [:index]
     before_action :check_sp_active, only: [:index]
-    before_action :override_csp_with_uris, only: [:index]
+    before_action :apply_secure_headers_override, only: [:index]
+    before_action :handle_banned_user
     before_action :confirm_user_is_authenticated_with_fresh_mfa, only: :index
     before_action :prompt_for_password_if_ial2_request_and_pii_locked, only: [:index]
     before_action :bump_auth_count, only: [:index]
@@ -21,8 +22,7 @@ module OpenidConnect
       return redirect_to_account_or_verify_profile_url if profile_or_identity_needs_verification?
       return redirect_to(sign_up_completed_url) if needs_completion_screen_reason
       link_identity_to_service_provider
-      if auth_count == 1 &&
-         (first_visit_for_sp? || IdentityConfig.store.show_select_account_on_repeat_sp_visits)
+      if auth_count == 1 && first_visit_for_sp?
         return redirect_to(user_authorization_confirmation_url)
       end
       handle_successful_handoff
@@ -136,7 +136,7 @@ module OpenidConnect
     def pii_requested_but_locked?
       sp_session && sp_session_ial > 1 &&
         UserDecorator.new(current_user).identity_verified? &&
-        user_session[:decrypted_pii].blank?
+        !Pii::Cacher.new(current_user, user_session).exists_in_session?
     end
 
     def track_events

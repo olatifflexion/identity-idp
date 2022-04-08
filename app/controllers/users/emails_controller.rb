@@ -26,9 +26,15 @@ module Users
 
     def resend
       email_address = EmailAddress.find_with_email(session_email)
-      SendAddEmailConfirmation.new(current_user).call(email_address)
-      flash[:success] = t('notices.resend_confirmation_email.success')
-      redirect_to add_email_verify_email_url
+
+      if email_address && !email_address.confirmed?
+        SendAddEmailConfirmation.new(current_user).call(email_address)
+        flash[:success] = t('notices.resend_confirmation_email.success')
+        redirect_to add_email_verify_email_url
+      else
+        flash[:error] = t('errors.general')
+        redirect_to add_email_url
+      end
     end
 
     def confirm_delete
@@ -93,7 +99,8 @@ module Users
 
     def check_max_emails_per_account
       return if EmailPolicy.new(current_user).can_add_email?
-      redirect_to account_url
+      flash[:email_error] = t('email_addresses.add.limit')
+      redirect_to account_url(anchor: 'emails')
     end
 
     def retain_confirmed_emails

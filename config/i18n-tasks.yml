@@ -45,8 +45,8 @@ data:
 search:
   ## Paths or `File.find` patterns to search in:
   paths:
-   - app/
-   - lib/
+    - app/
+    - lib/
 
   ## Root directories for relative keys resolution.
   relative_roots:
@@ -63,7 +63,6 @@ search:
     - app/assets/images
     - app/assets/fonts
     - app/views/shared/newrelic/_browser_instrumentation.html.erb
-    - app/javascript/app/local-time.js
     - app/javascript/packages/rails-i18n-webpack-plugin
     - app/javascript/packages/react-i18n
     - app/javascript/packages/i18n
@@ -95,7 +94,7 @@ ignore_missing:
 ## any unused translations would fail erroneously.
 ignore_unused:
   - 'account.login.piv_cac_info.*'
-  - 'datetime.dotiw.two_words_connector'
+  - 'countries.*'
   - 'devise.failure.*'
   - 'devise.mailer.reset_password_instructions.subject'
   - 'devise.sessions.signed_in'

@@ -2,7 +2,7 @@
 
 <%= render 'shared/sp_alert' %>
 
-<h1 class='margin-y-0'><%= t('titles.registrations.new') %></h1>
+<%= render PageHeadingComponent.new.with_content(t('titles.registrations.new')) %>
 
 <%= simple_form_for(
       @register_user_email_form,
@@ -18,24 +18,8 @@
         input_html: { autocorrect: 'off' },
       ) %>
 
-  <fieldset class="usa-fieldset">
-    <legend class="margin-bottom-1">
-      <%= t('forms.registration.labels.email_language') %>
-    </legend>
-
-    <p class="margin-bottom-4">
-      <%= t(
-            'account.email_language.languages_list',
-            app_name: APP_NAME,
-            list: I18n.available_locales.
-              map { |locale| t("account.email_language.name.#{locale}") }.
-              to_sentence(last_word_connector: " #{t('account.email_language.sentence_connector')} "),
-          ) %>
-    </p>
-
-    <%= render partial: 'shared/email_languages',
-               locals: { f: f, selection: @register_user_email_form.email_language } %>
-  </fieldset>
+  <%= render partial: 'shared/email_languages',
+             locals: { f: f, selection: @register_user_email_form.email_language } %>
 
   <%= render ValidatedFieldComponent.new(
         form: f,
@@ -45,6 +29,7 @@
           <%= t('sign_up.terms', app_name: APP_NAME) %>
           <%= new_window_link_to(t('titles.rules_of_use'), MarketingSite.rules_of_use_url) %>
         <% end,
+        label_html: { class: 'margin-y-0' },
         required: true,
       ) %>
 
@@ -53,7 +38,7 @@
         :button,
         t('forms.buttons.submit.default'),
         type: :submit,
-        class: 'usa-button usa-button--big usa-button--wide margin-y-5',
+        class: 'display-block usa-button usa-button--big usa-button--wide margin-y-5',
       ) %>
 <% end %>
 

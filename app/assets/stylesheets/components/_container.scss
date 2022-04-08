@@ -1,14 +1,11 @@
 .cntnr-skinny {
   max-width: $container-skinny-width;
 }
-.cntnr-xskinny {
-  max-width: $container-xskinny-width;
-}
 .cntnr-xxskinny {
   max-width: $container-xxskinny-width;
 }
 
-@media #{$breakpoint-sm} {
+@include at-media('tablet') {
   .cntnr-xxskinny {
     max-width: $container-xskinny-width;
   }

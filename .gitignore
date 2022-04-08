@@ -59,6 +59,7 @@ Vagrantfile
 /kitchen/cookbooks
 /log/*
 /postgres-data
+/public/api
 /public/system
 /public/user_flows
 /pwned_passwords/*
@@ -69,6 +70,8 @@ Vagrantfile
 /.tmp/
 /.vscode/
 /vendor/bundle
+.yardoc
+/doc/
 
 package-lock.json
 
@@ -84,6 +87,8 @@ saml_*.key
 /kitchen/data_bags/config/databag_secrets.json
 /public/assets
 /public/packs
+/app/assets/builds/*
+!/app/assets/builds/.keep
 **/node_modules
 yarn-debug.log*
 yarn-error.log*

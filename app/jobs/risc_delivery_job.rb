@@ -17,6 +17,10 @@ class RiscDeliveryJob < ApplicationJob
            wait: :exponentially_longer,
            attempts: 10
 
+  def self.warning_error_classes
+    NETWORK_ERRORS + [ RedisRateLimiter::LimitError ]
+  end
+
   def perform(
     push_notification_url:,
     jwt:,
@@ -48,13 +52,25 @@ class RiscDeliveryJob < ApplicationJob
         }.to_json,
       )
     end
-  rescue *NETWORK_ERRORS, RedisRateLimiter::LimitError => err
-    raise err if !inline?
+  rescue *NETWORK_ERRORS => err
+    raise err if self.executions < 2 && !inline?
 
     Rails.logger.warn(
       {
-        event: err.is_a?(RedisRateLimiter::LimitError) ? 'http_push_rate_limit' : 'http_push_error',
-        transport: 'direct',
+        event: 'http_push_error',
+        transport: inline? ? 'direct' : 'async',
+        event_type: event_type,
+        service_provider: issuer,
+        error: err.message,
+      }.to_json,
+    )
+  rescue RedisRateLimiter::LimitError => err
+    raise err if self.executions < 10 && !inline?
+
+    Rails.logger.warn(
+      {
+        event: 'http_push_rate_limit',
+        transport: inline? ? 'direct' : 'async',
         event_type: event_type,
         service_provider: issuer,
         error: err.message,

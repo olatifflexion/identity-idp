@@ -12,7 +12,7 @@ feature 'OIDC Authorization Confirmation' do
       user = user_with_2fa
 
       sign_in_oidc_user(user)
-      check :remember_device
+      check t('forms.messages.remember_device')
       fill_in_code_with_last_phone_otp
       click_submit_default
       click_agree_and_continue
@@ -67,21 +67,6 @@ feature 'OIDC Authorization Confirmation' do
       # second visit
       visit_idp_from_ial1_oidc_sp
       expect(current_url).to match('http://localhost:7654/auth/result')
-    end
-
-    it 'does render the confirmation screen on a return visit to the SP if configured' do
-      allow(IdentityConfig.store).to receive(:show_select_account_on_repeat_sp_visits).
-        and_return(true)
-      second_email = create(:email_address, user: user1)
-      sign_in_user(user1, second_email.email)
-
-      # first visit
-      visit_idp_from_ial1_oidc_sp
-      continue_as(second_email.email)
-
-      # second visit
-      visit_idp_from_ial1_oidc_sp
-      expect(current_path).to eq(user_authorization_confirmation_path)
     end
 
     it 'does not render an error if a user goes back after opting to switch accounts' do

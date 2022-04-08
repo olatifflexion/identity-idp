@@ -1,5 +1,10 @@
 es:
   forms:
+    messages:
+      one: 'Un mensaje'
+      other: '%{count} mensajes'
+    dynamic: Dinámico
     button:
       submit: Enviar
       cancel: Cancelar
+      reset: Reiniciar

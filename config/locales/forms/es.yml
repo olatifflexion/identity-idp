@@ -2,14 +2,15 @@
 es:
   forms:
     backup_code:
-      are_you_sure_continue_prologue: Si no tienes acceso a ningún otro método de autenticación,
-      are_you_sure_desc: '<br> <b> Los códigos de respaldo no son muy seguros </b>
-        porque se pueden perder o robar fácilmente. <b> Si peude, elija otra
-        opción </b>, (usar un teléfono, descargar una aplicación de
-        autenticación o usar una clave de seguridad). <br><br> <b> Si continúa
-        con los códigos de copia de seguridad, manténgalos seguros </b>. Le
-        daremos 10 códigos que puede descargar, imprimir, copiar o escribir. Más
-        tarde, deberás ingresar un codigo cada vez que inicies sesión.'
+      are_you_sure_desc_html:
+        - <strong>Los códigos de respaldo no son muy seguros</strong> porque se
+          pueden perder o robar fácilmente. <strong>Si peude, elija otra
+          opción</strong>, (usar un teléfono, descargar una aplicación de
+          autenticación o usar una clave de seguridad).
+        - <strong>Si continúa con los códigos de copia de seguridad, manténgalos
+          seguros</strong>. Le daremos 10 códigos que puede descargar, imprimir,
+          copiar o escribir. Más tarde, deberás ingresar un codigo cada vez que
+          inicies sesión.
       are_you_sure_title: '¿Estás seguro? Le daremos códigos de respaldo para guardar y usar.'
       caution_delete: Si elimina sus códigos de respaldo, ya no podrá usarlos para
         iniciar sesión.
@@ -54,8 +55,6 @@ es:
       buttons:
         delete: Eliminar correo electrónico
     example: 'Ejemplo:'
-    file_input:
-      file_updated: Archivo actualizado
     messages:
       remember_device: Recuerde este navegador
     password: Contraseña
@@ -65,7 +64,6 @@ es:
           submit: Cambiar la contraseña
         labels:
           password: Nueva contraseña
-      show: Mostrar contraseña
     personal_key:
       alternative: '¿No tiene su clave personal?'
       confirmation_label: Clave personal
@@ -138,8 +136,10 @@ es:
       instructions_text: Use el desbloqueo facial o táctil para acceder a su cuenta
         con %{app_name}.
       instructions_title: Use el desbloqueo facial o táctil para acceder a su cuenta.
-      intro: Use el desbloqueo facial o táctil para acceder a su cuenta.
-      login_text: Cuando esté listo, presione el botón.
+      intro: Habilite el desbloqueo facial o táctil en este dispositivo como método de
+        autenticación. Necesitará este dispositivo para poder usar ese método en
+        el futuro. Comience dándole un apodo a su dispositivo.
+      login_text: 'Cuando esté listo, presione el botón:'
       nickname: Apodo de dispositivo.
     webauthn_setup:
       continue: Continuar
@@ -149,5 +149,5 @@ es:
       intro: Añada una clave de seguridad que cumpla el estándar FIDO como método de
         autenticación. Puede añadir tantas claves de seguridad como desee. Para
         empezar, primero asigne un apodo a su clave de seguridad.
-      login_text: Cuando esté listo para autenticarse, presione el botón
+      login_text: 'Cuando esté listo para autenticarse, presione el botón:'
       nickname: Apodo clave de seguridad

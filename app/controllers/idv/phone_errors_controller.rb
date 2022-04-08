@@ -6,15 +6,22 @@ module Idv
     before_action :confirm_idv_phone_step_needed
 
     def warning
+      @remaining_attempts = throttle.remaining_count
+      track_event(type: :warning)
+    end
+
+    def timeout
       @remaining_step_attempts = throttle.remaining_count
     end
 
     def jobfail
-      @remaining_step_attempts = throttle.remaining_count
+      @remaining_attempts = throttle.remaining_count
+      track_event(type: :jobfail)
     end
 
     def failure
       @expires_at = throttle.expires_at
+      track_event(type: :failure)
     end
 
     private
@@ -26,6 +33,17 @@ module Idv
     def confirm_idv_phone_step_needed
       return unless user_fully_authenticated?
       redirect_to idv_review_url if idv_session.user_phone_confirmation == true
+    end
+
+    def track_event(type:)
+      attributes = { type: type }
+      if type == :failure
+        attributes[:throttle_expires_at] = @expires_at
+      else
+        attributes[:remaining_attempts] = @remaining_attempts
+      end
+
+      analytics.idv_phone_error_visited(**attributes)
     end
   end
 end

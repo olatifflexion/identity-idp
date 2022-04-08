@@ -3,24 +3,12 @@ require 'rails_helper'
 RSpec.describe ScriptHelper do
   include ScriptHelper
 
-  before do
-    allow_any_instance_of(ScriptHelper).to receive(:manifest).and_return(
-      'entrypoints' => {
-        'application' => {
-          'assets' => { 'js' => ['/packs/application.js', '/packs/application.en.js'] },
-        },
-        'document-capture' => {
-          'assets' => { 'js' => ['/packs/document-capture.js', '/packs/document-capture.en.js'] },
-        },
-      },
-    )
-  end
-
   describe '#javascript_include_tag_without_preload' do
     it 'avoids modifying headers' do
-      javascript_include_tag_without_preload 'application'
+      output = javascript_include_tag_without_preload 'application'
 
       expect(response.header['Link']).to be_nil
+      expect(output).to have_css('script', visible: :all)
     end
   end
 
@@ -43,32 +31,69 @@ RSpec.describe ScriptHelper do
       before do
         javascript_packs_tag_once('document-capture', 'document-capture')
         javascript_packs_tag_once('application', prepend: true)
+        allow(AssetSources).to receive(:get_sources).with('polyfill').and_return(['/polyfill.js'])
+        allow(AssetSources).to receive(:get_sources).with('application', 'document-capture').
+          and_return(['/application.js', '/document-capture.js'])
       end
 
-      it 'prints all unique packs in order, locale scripts first' do
+      it 'prints script sources' do
         output = render_javascript_pack_once_tags
 
-        selectors = [
-          "script[src^='/packs/application.en.js']",
-          "script[src^='/packs/document-capture.en.js']",
-          "script[src^='/packs/application.js']",
-          "script[src^='/packs/document-capture.js']",
-        ]
+        expect(output).to have_css(
+          "script:not([crossorigin])[src^='/polyfill.js'][nomodule] ~ \
+          script:not([crossorigin])[src^='/application.js'] ~ \
+          script:not([crossorigin])[src^='/document-capture.js']",
+          count: 1,
+          visible: :all,
+        )
+      end
 
-        selectors.each_with_index do |selector, i|
-          next_selector = selectors[i + 1]
-          test_selector = selector
-          test_selector += " ~ #{next_selector}" if next_selector
-          expect(output).to have_css(test_selector, count: 1, visible: false)
+      context 'local development crossorigin sources' do
+        let(:webpack_port) { '3035' }
+
+        before do
+          allow(Rails.env).to receive(:development?).and_return(true)
+          stub_const('ENV', 'WEBPACK_PORT' => webpack_port)
+        end
+
+        it 'prints script sources with crossorigin attribute' do
+          output = render_javascript_pack_once_tags
+
+          expect(output).to have_css(
+            "script[crossorigin][src^='/polyfill.js'][nomodule] ~ \
+            script[crossorigin][src^='/application.js'] ~ \
+            script[crossorigin][src^='/document-capture.js']",
+            count: 1,
+            visible: :all,
+          )
+        end
+
+        context 'empty webpack port' do
+          let(:webpack_port) { '' }
+
+          it 'renders as if webpack port was unassigned' do
+            output = render_javascript_pack_once_tags
+
+            expect(output).to_not have_css('[crossorigin]', visible: :all)
+          end
         end
       end
     end
 
     context 'with named scripts argument' do
+      before do
+        allow(AssetSources).to receive(:get_sources).with('polyfill').and_return(['/polyfill.js'])
+        allow(AssetSources).to receive(:get_sources).with('application').
+          and_return(['/application.js'])
+      end
+
       it 'enqueues those scripts before printing them' do
         output = render_javascript_pack_once_tags('application')
 
-        expect(output).to have_css('script[src="/packs/application.js"]', visible: :all)
+        expect(output).to have_css(
+          "script[src^='/polyfill.js'][nomodule] ~ script[src='/application.js']",
+          visible: :all,
+        )
       end
     end
 
@@ -78,7 +103,7 @@ RSpec.describe ScriptHelper do
       end
 
       it 'gracefully outputs nothing' do
-        expect(render_javascript_pack_once_tags).to be_empty
+        expect(render_javascript_pack_once_tags).to be_nil
       end
     end
   end

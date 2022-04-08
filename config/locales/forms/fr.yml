@@ -2,15 +2,16 @@
 fr:
   forms:
     backup_code:
-      are_you_sure_continue_prologue: Si vous n’avez accès à aucune autre méthode d’authentification,
-      are_you_sure_desc: '<br><b>Les codes de sauvegarde ne sont pas très sûrs</b> car
-        ils peuvent facilement être perdus ou volés. <b> Si vous le pouvez,
-        choisissez une autre option</b> (utiliser un téléphone, télécharger une
-        application d’authentification ou utiliser une clé de sécurité).
-        <br><br><b>Si vous continuez à utiliser des codes de sauvegarde,
-        protégez-les </b>. Nous vous donnerons 10 codes que vous pourrez
-        télécharger, imprimer, copier ou écrire. Plus tard, vous devrez en
-        entrer un à chaque fois que vous vous connectez.'
+      are_you_sure_desc_html:
+        - <strong>Les codes de sauvegarde ne sont pas très sûrs</strong> car ils
+          peuvent facilement être perdus ou volés. <strong>Si vous le pouvez,
+          choisissez une autre option</strong> (utiliser un téléphone,
+          télécharger une application d’authentification ou utiliser une clé de
+          sécurité).
+        - <strong>Si vous continuez à utiliser des codes de sauvegarde,
+          protégez-les</strong>. Nous vous donnerons 10 codes que vous pourrez
+          télécharger, imprimer, copier ou écrire. Plus tard, vous devrez en
+          entrer un à chaque fois que vous vous connectez.
       are_you_sure_title: Êtes-vous sûr? Nous vous donnerons des codes de sauvegarde à
         sauvegarder et à utiliser.
       caution_delete: Si vous supprimez vos codes de sauvegarde, vous ne pourrez plus
@@ -55,8 +56,6 @@ fr:
       buttons:
         delete: Supprimer l’email
     example: 'Exemple:'
-    file_input:
-      file_updated: Fichier mis à jour
     messages:
       remember_device: Enregistrer ce navigateur
     password: Mot de passe
@@ -66,7 +65,6 @@ fr:
           submit: Changer le mot de passe
         labels:
           password: Nouveau mot de passe
-      show: Afficher le mot de passe
     personal_key:
       alternative: Vous n’avez pas votre clé personnelle?
       confirmation_label: Clé personnelle
@@ -142,9 +140,11 @@ fr:
         déverouillage facial pour accéder à votre compte avec %{app_name}.
       instructions_title: Utilisez le déverrouillage par empreinte digitale ou le
         déverouillage facial pour accéder à votre compte.
-      intro: Utilisez le déverrouillage par empreinte digitale ou le déverouillage
-        facial pour accéder à votre compte.
-      login_text: Lorsque vous êtes prêt, appuyez sur le bouton.
+      intro: Activez le déverrouillage facial ou tactile comme méthode
+        d’authentification sur cet appareil. Vous aurez besoin de cet appareil
+        pour utiliser cette méthode à l’avenir. Commencez par donner un surnom à
+        votre appareil.
+      login_text: 'Lorsque vous êtes prêt, appuyez sur le bouton:'
       nickname: Pseudo dispositivo
     webauthn_setup:
       continue: Continuer
@@ -155,5 +155,5 @@ fr:
         d’authentification. Vous pouvez ajouter autant de clés de sécurité que
         vous le souhaitez. Pour commencer, donnez d’abord un surnom à votre clé
         de sécurité.
-      login_text: Lorsque vous êtes prêt à vous authentifier, appuyez sur le bouton
+      login_text: 'Lorsque vous êtes prêt à vous authentifier, appuyez sur le bouton:'
       nickname: Pseudo clé de sécurité

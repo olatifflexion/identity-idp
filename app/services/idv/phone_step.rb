@@ -22,10 +22,10 @@ module Idv
       dcs_uuid = idv_session.idv_phone_step_document_capture_session_uuid
       dcs = DocumentCaptureSession.find_by(uuid: dcs_uuid)
       return ProofingSessionAsyncResult.none if dcs_uuid.nil?
-      return timed_out if dcs.nil?
+      return missing if dcs.nil?
 
       proofing_job_result = dcs.load_proofing_result
-      return timed_out if proofing_job_result.nil?
+      return missing if proofing_job_result.nil?
 
       proofing_job_result
     end
@@ -74,7 +74,7 @@ module Idv
     end
 
     def uuid_prefix
-      ServiceProvider.find_by(issuer: idv_session.issuer)&.app_id
+      idv_session.service_provider&.app_id
     end
 
     def normalized_phone
@@ -143,14 +143,14 @@ module Idv
       Idv::Agent.new(applicant).proof_address(
         document_capture_session,
         trace_id: trace_id,
-        issuer: idv_session.issuer,
+        issuer: idv_session.service_provider&.issuer,
         user_id: idv_session.current_user.id,
       )
     end
 
-    def timed_out
+    def missing
       delete_async
-      ProofingSessionAsyncResult.timed_out
+      ProofingSessionAsyncResult.missing
     end
 
     def delete_async

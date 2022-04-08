@@ -127,7 +127,7 @@ describe Idv::DocAuthController do
         pii_like_keypaths: [[:errors, :ssn], [:error_details, :ssn]],
       }
 
-      put :update, params: {step: 'ssn', doc_auth: { step: 'ssn', ssn: '111-11-1111' } }
+      put :update, params: { step: 'ssn', doc_auth: { step: 'ssn', ssn: '111-11-1111' } }
 
       expect(@analytics).to have_received(:track_event).with(
         'IdV: ' + "#{Analytics::DOC_AUTH} ssn submitted".downcase, result
@@ -138,16 +138,9 @@ describe Idv::DocAuthController do
       mock_next_step(:back_image)
       allow_any_instance_of(Flow::BaseFlow).to \
         receive(:flow_session).and_return(pii_from_doc: {})
-      result = {
-        success: true,
-        errors: {},
-        step: 'ssn',
-        step_count: 1,
-        pii_like_keypaths: [[:errors, :ssn], [:error_details, :ssn]],
-      }
 
-      put :update, params: {step: 'ssn', doc_auth: { step: 'ssn', ssn: '666-66-6666' } }
-      put :update, params: {step: 'ssn', doc_auth: { step: 'ssn', ssn: '111-11-1111' } }
+      put :update, params: { step: 'ssn', doc_auth: { step: 'ssn', ssn: '666-66-6666' } }
+      put :update, params: { step: 'ssn', doc_auth: { step: 'ssn', ssn: '111-11-1111' } }
 
       expect(@analytics).to have_received(:track_event).with(
         'IdV: ' + "#{Analytics::DOC_AUTH} ssn submitted".downcase,

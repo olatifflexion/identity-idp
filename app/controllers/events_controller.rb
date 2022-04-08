@@ -6,8 +6,8 @@ class EventsController < ApplicationController
   EVENTS_PAGE_SIZE = 25
 
   def show
-    analytics.track_event(Analytics::EVENTS_VISIT)
-    @view_model = AccountShow.new(
+    analytics.events_visit
+    @presenter = AccountShowPresenter.new(
       decrypted_pii: nil,
       personal_key: nil,
       sp_session_request_url: sp_session_request_url_with_updated_params,

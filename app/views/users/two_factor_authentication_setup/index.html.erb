@@ -10,11 +10,17 @@
       ) %>
 <% end %>
 
-<h1 class="margin-y-0"><%= @presenter.heading %></h1>
+<%= render PageHeadingComponent.new.with_content(@presenter.heading) %>
 
-<p class="mt-tiny"><%== @presenter.intro %></p>
+<p class="maxw-mobile-lg margin-bottom-0"><%= @presenter.intro %></p>
 
-<%= render(AlertComponent.new) { t('two_factor_authentication.lockout_information') } %>
+<%# If it is decided that there will be an info banner on this page for MFA setup, the text will need Gengo translations %>
+
+<% if IdentityConfig.store.select_multiple_mfa_options %>
+  <%= render AlertComponent.new(type: :info, class: 'margin-bottom-4') do %>
+    <%= t('multi_factor_authentication.info') %>
+  <% end %>
+<% end %>
 
 <%= validated_form_for @two_factor_options_form,
                        html: { autocomplete: 'off' },
@@ -22,38 +28,55 @@
                        url: two_factor_options_path do |f| %>
   <div class="margin-bottom-4">
     <fieldset class="margin-0 padding-0 border-0">
-      <legend class="margin-bottom-2"><%= t('forms.two_factor_choice.legend') %>:</legend>
+      <legend class="margin-bottom-2 usa-sr-only"><%= @presenter.intro %></legend>
       <% @presenter.options.each do |option| %>
         <div id="<%= "select_#{option.type}" %>" class="<%= option.html_class %>">
-          <%= radio_button_tag(
-                'two_factor_options_form[selection]',
-                option.type,
-                false,
-                disabled: option.disabled?,
-                class: 'usa-radio__input usa-radio__input--tile',
-              ) %>
-          <%= label_tag(
-                "two_factor_options_form_selection_#{option.type}",
-                class: 'usa-radio__label',
-              ) do %>
-                <%= option.label %>
-                <span class="usa-radio__label-description position-relative padding-bottom-4">
-                  <%= option.info %>
-                  <% if option.security_level && @presenter.show_security_level? %>
-                    <span class="usa-tag pin-bottom pin-right <%= option.disabled? ? 'bg-base-light' : 'bg-info-dark' %>">
-                      <%= option.security_level %>
-                    </span>
+          <% if IdentityConfig.store.select_multiple_mfa_options %>
+            <%= check_box_tag(
+                  'two_factor_options_form[selection][]',
+                  option.type,
+                  false,
+                  disabled: option.disabled?,
+                  class: 'usa-checkbox__input usa-checkbox__input--tile',
+                  id: "two_factor_options_form_selection_#{option.type}",
+                ) %>
+            <%= label_tag(
+                  "two_factor_options_form_selection_#{option.type}",
+                  class: 'usa-checkbox__label usa-checkbox__label--illustrated',
+                ) do %>
+                    <%= image_tag(asset_url("mfa-options/#{option.type}.svg"), alt: "#{option.label} icon", class: 'usa-checkbox__image') %>
+                    <div class="usa-checkbox__label--text"><%= option.label %>
+                      <span class="usa-checkbox__label-description">
+                        <%= option.info %>
+                      </span>
+                    </div>
                   <% end %>
-                </span>
-              <% end %>
+          <% else %>
+            <%= radio_button_tag(
+                  'two_factor_options_form[selection]',
+                  option.type,
+                  false,
+                  disabled: option.disabled?,
+                  class: 'usa-radio__input usa-radio__input--tile',
+                ) %>
+            <%= label_tag(
+                  "two_factor_options_form_selection_#{option.type}",
+                  class: 'usa-radio__label usa-radio__label--illustrated',
+                ) do %>
+                    <%= image_tag(asset_url("mfa-options/#{option.type}.svg"), alt: "#{option.label} icon", class: 'usa-radio__image') %>
+                    <div class="usa-radio__label--text"><%= option.label %>
+                      <span class="usa-radio__label-description">
+                        <%= option.info %>
+                      </span>
+                    </div>
+                  <% end %>
+          <% end %>
         </div>
       <% end %>
     </fieldset>
   </div>
 
-  <div>
-    <%= f.button :submit, t('forms.buttons.continue'), class: 'usa-button--big usa-button--wide margin-bottom-1' %>
-  </div>
+  <%= f.button :submit, t('forms.buttons.continue'), class: 'usa-button--big usa-button--wide margin-bottom-1' %>
 <% end %>
 
 <%= render 'shared/cancel', link: destroy_user_session_path %>

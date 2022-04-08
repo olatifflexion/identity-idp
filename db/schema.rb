@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_05_174343) do
+ActiveRecord::Schema.define(version: 2022_03_07_214616) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
@@ -392,6 +392,16 @@ ActiveRecord::Schema.define(version: 2022_01_05_174343) do
     t.index ["user_id", "made_default_at", "created_at"], name: "index_phone_configurations_on_made_default_at"
   end
 
+  create_table "phone_number_opt_outs", force: :cascade do |t|
+    t.string "encrypted_phone"
+    t.string "phone_fingerprint", null: false
+    t.string "uuid"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["phone_fingerprint"], name: "index_phone_number_opt_outs_on_phone_fingerprint", unique: true
+    t.index ["uuid"], name: "index_phone_number_opt_outs_on_uuid", unique: true
+  end
+
   create_table "piv_cac_configurations", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "x509_dn_uuid", null: false
@@ -534,6 +544,14 @@ ActiveRecord::Schema.define(version: 2022_01_05_174343) do
     t.index ["issuer"], name: "index_service_providers_on_issuer", unique: true
   end
 
+  create_table "sign_in_restrictions", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "service_provider"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id", "service_provider"], name: "index_sign_in_restrictions_on_user_id_and_service_provider", unique: true
+  end
+
   create_table "sp_costs", force: :cascade do |t|
     t.string "issuer", null: false
     t.integer "agency_id", null: false
@@ -607,6 +625,7 @@ ActiveRecord::Schema.define(version: 2022_01_05_174343) do
     t.datetime "remember_device_revoked_at"
     t.string "email_language", limit: 10
     t.datetime "accepted_terms_at"
+    t.datetime "encrypted_recovery_code_digest_generated_at"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["uuid"], name: "index_users_on_uuid", unique: true

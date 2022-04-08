@@ -59,8 +59,12 @@ describe 'throttling requests' do
     end
 
     context 'when the number of requests is higher than the limit' do
+      around do |ex|
+        freeze_time { ex.run }
+      end
+
       it 'throttles with a custom response' do
-        analytics = instance_double(Analytics)
+        analytics = FakeAnalytics.new
         allow(Analytics).to receive(:new).and_return(analytics)
         allow(analytics).to receive(:track_event)
 
@@ -75,11 +79,49 @@ describe 'throttling requests' do
         expect(analytics).
           to have_received(:track_event).with(Analytics::RATE_LIMIT_TRIGGERED, type: 'req/ip')
       end
+
+      it 'does not throttle if the path is in the allowlist' do
+        allow(IdentityConfig.store).to receive(:requests_per_ip_path_prefixes_allowlist).
+          and_return(['/account'])
+        analytics = FakeAnalytics.new
+        allow(Analytics).to receive(:new).and_return(analytics)
+        allow(analytics).to receive(:track_event)
+
+        (requests_per_ip_limit + 1).times do
+          get '/account', headers: { REMOTE_ADDR: '1.2.3.4' }
+        end
+
+        expect(response.status).to eq(302)
+        expect(response.body).
+          to_not include('Please wait a few minutes before you try again.')
+        expect(analytics).
+          to_not have_received(:track_event).with(Analytics::RATE_LIMIT_TRIGGERED, type: 'req/ip')
+      end
+
+      it 'does not throttle if the ip is in the CIDR block allowlist' do
+        analytics = FakeAnalytics.new
+        allow(Analytics).to receive(:new).and_return(analytics)
+        allow(analytics).to receive(:track_event)
+
+        (requests_per_ip_limit + 1).times do
+          get '/', headers: { REMOTE_ADDR: '172.18.100.100' }
+        end
+
+        expect(response.status).to eq(200)
+        expect(response.body).
+          to_not include('Please wait a few minutes before you try again.')
+        expect(analytics).
+          to_not have_received(:track_event).with(Analytics::RATE_LIMIT_TRIGGERED, type: 'req/ip')
+      end
     end
 
     context 'when the user is signed in' do
+      around do |ex|
+        freeze_time { ex.run }
+      end
+
       it 'logs the user UUID' do
-        analytics = instance_double(Analytics)
+        analytics = FakeAnalytics.new
         allow(Analytics).to receive(:new).and_return(analytics)
         allow(analytics).to receive(:track_event)
 
@@ -144,8 +186,12 @@ describe 'throttling requests' do
     end
 
     context 'when the number of logins per ip is higher than the limit per period' do
+      around do |ex|
+        freeze_time { ex.run }
+      end
+
       it 'throttles with a custom response' do
-        analytics = instance_double(Analytics)
+        analytics = FakeAnalytics.new
         allow(Analytics).to receive(:new).and_return(analytics)
         allow(analytics).to receive(:track_event)
 
@@ -171,6 +217,10 @@ describe 'throttling requests' do
   end
 
   describe 'logins per email and ip' do
+    around do |ex|
+      freeze_time { ex.run }
+    end
+
     context 'when the number of requests is lower or equal to the limit' do
       it 'does not throttle' do
         (logins_per_email_and_ip_limit - 1).times do
@@ -204,7 +254,7 @@ describe 'throttling requests' do
 
     context 'when number of logins per email + ip is higher than limit per period' do
       it 'throttles with a custom response' do
-        analytics = instance_double(Analytics)
+        analytics = FakeAnalytics.new
         allow(Analytics).to receive(:new).and_return(analytics)
         allow(analytics).to receive(:track_event)
 
@@ -231,6 +281,10 @@ describe 'throttling requests' do
   end
 
   describe 'otps per ip' do
+    around do |ex|
+      freeze_time { ex.run }
+    end
+
     let(:otps_per_ip_limit) { IdentityConfig.store.otps_per_ip_limit }
 
     context 'when the number of requests is under the limit' do
@@ -258,6 +312,10 @@ describe 'throttling requests' do
   end
 
   describe 'phone setups per ip' do
+    around do |ex|
+      freeze_time { ex.run }
+    end
+
     let(:phone_setups_per_ip_limit) { IdentityConfig.store.phone_setups_per_ip_limit }
 
     context 'when the number of requests is under the limit' do

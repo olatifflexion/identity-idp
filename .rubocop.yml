@@ -9,7 +9,6 @@ require:
   - ./lib/linters/localized_validation_message_linter.rb
   - ./lib/linters/mail_later_linter.rb
   - ./lib/linters/redirect_back_linter.rb
-  - ./lib/linters/translation_linter.rb
   - ./lib/linters/url_options_linter.rb
   - ./lib/linters/errors_add_linter.rb
 
@@ -48,11 +47,6 @@ IdentityIdp/LocalizedValidationMessageLinter:
 
 IdentityIdp/MailLaterLinter:
   Enabled: true
-
-IdentityIdp/TranslationLinter:
-  Enabled: true
-  Include:
-    - 'spec/support/monitor/**/*.rb'
 
 IdentityIdp/UrlOptionsLinter:
   Enabled: true
@@ -240,6 +234,7 @@ Layout/MultilineOperationIndentation:
     - aligned
     - indented
   IndentationWidth: null
+
 Layout/ParameterAlignment:
   Description: Align the parameters of a method call if they span more than one line.
   StyleGuide: https://github.com/bbatsov/ruby-style-guide#no-double-indent
@@ -248,6 +243,7 @@ Layout/ParameterAlignment:
     - with_first_parameter
     - with_fixed_indentation
   IndentationWidth: null
+
 Layout/RescueEnsureAlignment:
   Enabled: true
 
@@ -305,6 +301,9 @@ Layout/SpaceInLambdaLiteral:
 Layout/SpaceInsideBlockBraces:
   Enabled: true
 
+Layout/SpaceInsideHashLiteralBraces:
+  Enabled: true
+
 Layout/SpaceInsideParens:
   Enabled: true
 
@@ -328,6 +327,10 @@ Lint/AmbiguousRegexpLiteral:
 Lint/AssignmentInCondition:
   Enabled: true
   AllowSafeAssignment: true
+
+Layout/AssignmentIndentation:
+  Enabled: true
+  IndentationWidth: 2
 
 Lint/BigDecimalNew:
   Enabled: true
@@ -577,10 +580,17 @@ Lint/UnifiedInteger:
 Lint/UnreachableCode:
   Enabled: true
 
+Lint/UnusedMethodArgument:
+  Enabled: true
+  AllowUnusedKeywordArguments: false
+
 Lint/UriEscapeUnescape:
   Enabled: true
 
 Lint/UriRegexp:
+  Enabled: true
+
+Lint/UselessAssignment:
   Enabled: true
 
 Lint/UselessElseWithoutRescue:

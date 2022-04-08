@@ -50,7 +50,7 @@ class IdentityConfig
     @written_env = {}
   end
 
-  def add(key, type: :string, is_sensitive: false, allow_nil: false, enum: nil, options: {})
+  def add(key, type: :string, allow_nil: false, enum: nil, options: {})
     value = @read_env[key]
 
     converted_value = CONVERTERS.fetch(type).call(value, options: options) if !value.nil?
@@ -107,6 +107,8 @@ class IdentityConfig
     config.add(:aws_logo_bucket, type: :string)
     config.add(:aws_region, type: :string)
     config.add(:backup_code_cost, type: :string)
+    config.add(:broken_personal_key_window_start, type: :timestamp)
+    config.add(:broken_personal_key_window_finish, type: :timestamp)
     config.add(:country_phone_number_overrides, type: :json)
     config.add(:dashboard_api_token, type: :string)
     config.add(:dashboard_url, type: :string)
@@ -126,6 +128,7 @@ class IdentityConfig
     config.add(:database_worker_jobs_password, type: :string)
     config.add(:deleted_user_accounts_report_configs, type: :json)
     config.add(:deliver_mail_async, type: :boolean)
+    config.add(:disable_csp_unsafe_inline, type: :boolean)
     config.add(:disable_email_sending, type: :boolean)
     config.add(:disallow_all_web_crawlers, type: :boolean)
     config.add(:disposable_email_services, type: :json)
@@ -169,6 +172,7 @@ class IdentityConfig
     config.add(:idv_min_age_years, type: :integer)
     config.add(:idv_send_link_attempt_window_in_minutes, type: :integer)
     config.add(:idv_send_link_max_attempts, type: :integer)
+    config.add(:in_person_proofing_enabled, type: :boolean)
     config.add(:lexisnexis_base_url, type: :string)
     config.add(:lexisnexis_request_mode, type: :string)
     config.add(:lexisnexis_account_id, type: :string)
@@ -244,9 +248,6 @@ class IdentityConfig
     config.add(:platform_authentication_enabled, type: :boolean)
     config.add(:poll_rate_for_verify_in_seconds, type: :integer)
     config.add(:proofer_mock_fallback, type: :boolean)
-    config.add(:proofing_allow_expired_license, type: :boolean)
-    config.add(:proofing_expired_license_after, type: :date)
-    config.add(:proofing_expired_license_reproof_at, type: :date)
     config.add(:proofing_send_partial_dob, type: :boolean)
     config.add(:proof_address_max_attempts, type: :integer)
     config.add(:proof_address_max_attempt_window_in_minutes, type: :integer)
@@ -269,7 +270,9 @@ class IdentityConfig
     config.add(:remember_device_expiration_hours_aal_1, type: :integer)
     config.add(:remember_device_expiration_hours_aal_2, type: :integer)
     config.add(:report_timeout, type: :integer)
+    config.add(:requests_per_ip_cidr_allowlist, type: :comma_separated_string_list)
     config.add(:requests_per_ip_limit, type: :integer)
+    config.add(:requests_per_ip_path_prefixes_allowlist, type: :comma_separated_string_list)
     config.add(:requests_per_ip_period, type: :integer)
     config.add(:requests_per_ip_track_only_mode, type: :boolean)
     config.add(:reset_password_email_max_attempts, type: :integer)
@@ -292,6 +295,7 @@ class IdentityConfig
     config.add(:scrypt_cost, type: :string)
     config.add(:secret_key_base, type: :string)
     config.add(:seed_agreements_data, type: :boolean)
+    config.add(:select_multiple_mfa_options, type: :boolean)
     config.add(:service_provider_request_ttl_hours, type: :integer)
     config.add(:session_check_delay, type: :integer)
     config.add(:session_check_frequency, type: :integer)
@@ -299,9 +303,10 @@ class IdentityConfig
     config.add(:session_timeout_in_minutes, type: :integer)
     config.add(:session_timeout_warning_seconds, type: :integer)
     config.add(:session_total_duration_timeout_in_minutes, type: :integer)
+    config.add(:set_remember_device_session_expiration, type: :boolean)
     config.add(:show_user_attribute_deprecation_warnings, type: :boolean)
     config.add(:skip_encryption_allowed_list, type: :json)
-    config.add(:show_select_account_on_repeat_sp_visits, type: :boolean)
+    config.add(:sms_resubscribe_enabled, type: :boolean)
     config.add(:sp_context_needed_environment, type: :string)
     config.add(:sp_handoff_bounce_max_seconds, type: :integer)
     config.add(:sps_over_quota_limit_notify_email_list, type: :json)

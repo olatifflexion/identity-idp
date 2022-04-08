@@ -57,6 +57,8 @@ fr:
           d’autres enregistrements
         jobfail: Un problème s’est produit et nous ne pouvons pas traiter votre demande
           pour le moment. Veuillez réessayer.
+        timeout: Notre demande de vérification de vos renseignements a expiré. Veuillez
+          réessayer.
         warning: Veuillez vérifier les informations que vous avez saisies et réessayer.
       sessions:
         exception: Une erreur interne s’est produite lors du traitement de votre demande.
@@ -77,10 +79,10 @@ fr:
       reset_password: Réinitialiser le mot de passe
       try_again: Réessayer
       warnings:
-        warning_1: Si vous avez oublié votre mot de passe, vous devrez le réinitialiser
+        - Si vous avez oublié votre mot de passe, vous devrez le réinitialiser
           et remplir à nouveau le formulaire.
-        warning_2: Vous devrez ressaisir vos informations personnelles, comme votre nom,
-          votre numéro d’identification, etc.
+        - Vous devrez ressaisir vos informations personnelles, comme votre nom,
+          pièce d’identité officielle, etc.
     form:
       address1: Adresse
       address2: Adresse (optional)
@@ -97,11 +99,6 @@ fr:
       activated_html: Votre identité a été vérifiée. Si vous souhaitez modifier votre
         information vérifiée, veuillez %{link}.
       activated_link: communiquer avec nous
-      cancel: Pour continuer, %{app_name} doit vérifier votre identité. Nous devons
-        recueillir quelques informations personnelles de base ainsi que
-        certaines informations financières pour compléter ce processus. Si vous
-        n’avez pas cette information sous la main, vous pouvez continuer plus
-        tard.
       clear_and_start_over: Supprimer mes données et recommencer
       come_back_later: Une fois que votre lettre vous sera parvenue, veuillez vous
         connecter à %{app_name}, puis saisissez votre code de confirmation
@@ -137,7 +134,8 @@ fr:
         rules:
           - être un plan téléphonique associé à votre nom. Il n’est pas
             nécessaire que vous soyez le titulaire principal du compte.
-          - pas un téléphone virtuel (comme Google Voice ou Skype)
+          - ne pas être un téléphone virtuel (tel que Google Voice ou Skype) ou
+            un numéro à tarif majoré (péage).
           - un numéro américain
       return_to_profile: '‹ Revenir à votre profil %{app_name}'
       review:
@@ -164,8 +162,7 @@ fr:
       ssn: Numéro de sécurité sociale (SSN)
     titles:
       activated: Votre identité a déjà été vérifiée
-      cancel: Nous ne pouvons pas vérifier votre identité
-      come_back_later: Revenez vite.
+      come_back_later: Revenez vite
       mail:
         resend: Vous voulez une autre lettre?
         verify: Vous voulez une lettre?

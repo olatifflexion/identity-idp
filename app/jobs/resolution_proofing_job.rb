@@ -13,7 +13,7 @@ class ResolutionProofingJob < ApplicationJob
   )
 
   def perform(result_id:, encrypted_arguments:, trace_id:, should_proof_state_id:,
-              dob_year_only:, document_expired:)
+              dob_year_only:)
     timer = JobHelpers::Timer.new
 
     raise_stale_job! if stale_job?(enqueued_at)
@@ -25,7 +25,7 @@ class ResolutionProofingJob < ApplicationJob
 
     applicant_pii = decrypted_args[:applicant_pii]
 
-    callback_log_data = if !document_expired && dob_year_only && should_proof_state_id
+    callback_log_data = if dob_year_only && should_proof_state_id
                           proof_aamva_then_lexisnexis_dob_only(
                             timer: timer,
                             applicant_pii: applicant_pii,
@@ -36,7 +36,6 @@ class ResolutionProofingJob < ApplicationJob
                             timer: timer,
                             applicant_pii: applicant_pii,
                             should_proof_state_id: should_proof_state_id,
-                            document_expired: document_expired,
                           )
                         end
 
@@ -57,7 +56,7 @@ class ResolutionProofingJob < ApplicationJob
   private
 
   # @return [CallbackLogData]
-  def proof_lexisnexis_then_aamva(timer:, applicant_pii:, should_proof_state_id:, document_expired:)
+  def proof_lexisnexis_then_aamva(timer:, applicant_pii:, should_proof_state_id:)
     proofer_result = timer.time('resolution') do
       resolution_proofer.proof(applicant_pii)
     end
@@ -89,9 +88,9 @@ class ResolutionProofingJob < ApplicationJob
     }
 
     state_id_success = nil
-    if should_proof_state_id && result[:success] && !document_expired
+    if should_proof_state_id && result[:success]
       timer.time('state_id') do
-        proof_state_id(timer: timer, applicant_pii: applicant_pii, result: result)
+        proof_state_id(applicant_pii: applicant_pii, result: result)
       end
       state_id_success = result[:success]
     end
@@ -164,7 +163,7 @@ class ResolutionProofingJob < ApplicationJob
     )
   end
 
-  def proof_state_id(timer:, applicant_pii:, result:)
+  def proof_state_id(applicant_pii:, result:)
     proofer_result = state_id_proofer.proof(applicant_pii)
 
     result.merge!(proofer_result.to_h) do |key, orig, current|

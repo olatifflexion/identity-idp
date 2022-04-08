@@ -6,7 +6,7 @@ module RememberDeviceConcern
   end
 
   def save_remember_device_preference
-    return unless params[:remember_device] == 'true'
+    return if params[:remember_device] != '1' && params[:remember_device] != 'true'
     cookies.encrypted[:remember_device] = {
       value: RememberDeviceCookie.new(user_id: current_user.id, created_at: Time.zone.now).to_json,
       expires: remember_device_cookie_expiration,
@@ -77,6 +77,10 @@ module RememberDeviceConcern
   end
 
   def remember_device_cookie_expiration
-    IdentityConfig.store.remember_device_expiration_hours_aal_1.hours.from_now
+    if IdentityConfig.store.set_remember_device_session_expiration
+      nil
+    else
+      IdentityConfig.store.remember_device_expiration_hours_aal_1.hours.from_now
+    end
   end
 end

@@ -7,15 +7,16 @@ feature 'adding email address' do
     allow(UserMailer).to receive(:email_added).and_call_original
     user = create(:user, :signed_up)
     sign_in_user_and_add_email(user)
+    unconfirmed_email_text = "#{email}  #{t('email_addresses.unconfirmed')}"
 
     visit account_path
-    expect(page).to have_content("#{email}   #{t('email_addresses.unconfirmed')}")
+    expect(page).to have_content(unconfirmed_email_text)
 
     click_on_link_in_confirmation_email
 
     expect(page).to have_current_path(account_path)
     expect(page).to have_content(t('devise.confirmations.confirmed'))
-    expect(page).to_not have_content("#{email} #{t('email_addresses.unconfirmed')}")
+    expect(page).to_not have_content(unconfirmed_email_text)
     expect(UserMailer).to have_received(:email_added).twice
   end
 
@@ -111,8 +112,10 @@ feature 'adding email address' do
     user = create(:user, :signed_up)
     sign_in_and_2fa_user(user)
 
+    expect(page).to_not have_link(t('account.index.email_add'))
     visit add_email_path
     expect(page).to have_current_path(account_path)
+    expect(page).to have_content t('email_addresses.add.limit')
   end
 
   it 'stays on form with bad email' do
@@ -205,6 +208,7 @@ feature 'adding email address' do
 
     visit account_path
 
+    expect(page).to have_link(t('account.index.email_add'))
     within('.sidenav') do
       click_on t('account.navigation.add_email')
     end

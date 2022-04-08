@@ -12,6 +12,9 @@ fr:
       granted_token_missing: Le lien de suppression de votre compte %{app_name} n’est
         pas valide. Veuillez réessayer en cliquant sur le lien dans votre
         e-mail.
+    alt:
+      error: Erreur
+      warning: Avertissement
     attributes:
       password:
         too_short:
@@ -41,9 +44,7 @@ fr:
       throttled_text_html: '<strong>Veuillez réessayer dans %{timeout}.</strong> Pour
         votre sécurité, nous limitons le nombre de fois où vous pouvez tenter de
         vérifier un document en ligne.'
-    file_input:
-      invalid_type: Ce type de fichier n’est pas accepté, veuillez réessayer.
-    invalid_authenticity_token: Oups, une erreur s’est produite. Veuillez essayer de nouveau.
+    general: Oups, une erreur s’est produite. Veuillez essayer de nouveau.
     invalid_totp: Code non valide. Veuillez essayer de nouveau.
     max_password_attempts_reached: Vous avez inscrit des mots de passe incorrects un
       trop grand nombre de fois. Vous pouvez réinitialiser votre mot de passe en

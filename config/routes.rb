@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   # Non i18n routes. Alphabetically sorted.
+  get '/api/analytics-events' => 'analytics_events#index'
   get '/api/country-support' => 'country_support#index'
   get '/api/health' => 'health/health#index'
   get '/api/health/database' => 'health/database#index'
@@ -96,13 +97,17 @@ Rails.application.routes.draw do
       get '/login/two_factor/piv_cac' => 'two_factor_authentication/piv_cac_verification#show'
       get '/login/two_factor/piv_cac/present_piv_cac' => 'two_factor_authentication/piv_cac_verification#redirect_to_piv_cac_service'
       get '/login/two_factor/webauthn' => 'two_factor_authentication/webauthn_verification#show'
+      get '/login/two_factor/webauthn_error' => 'two_factor_authentication/webauthn_verification#error'
       patch '/login/two_factor/webauthn' => 'two_factor_authentication/webauthn_verification#confirm'
       get 'login/two_factor/backup_code' => 'two_factor_authentication/backup_code_verification#show'
       post 'login/two_factor/backup_code' => 'two_factor_authentication/backup_code_verification#create'
       get  '/login/two_factor/:otp_delivery_preference' => 'two_factor_authentication/otp_verification#show',
            as: :login_two_factor, constraints: { otp_delivery_preference: /sms|voice/ }
       post '/login/two_factor/:otp_delivery_preference' => 'two_factor_authentication/otp_verification#create',
-           as: :login_otp
+           as: :login_otp, constraints: { otp_delivery_preference: /sms|voice/ }
+      get '/login/two_factor/sms/:opt_out_uuid/opt_in' => 'two_factor_authentication/sms_opt_in#new',
+          as: :login_two_factor_sms_opt_in
+      post '/login/two_factor/sms/:opt_out_uuid/opt_in' => 'two_factor_authentication/sms_opt_in#create'
 
       get 'login/add_piv_cac/prompt' => 'users/piv_cac_setup_from_sign_in#prompt'
       post 'login/add_piv_cac/prompt' => 'users/piv_cac_setup_from_sign_in#decline'
@@ -125,8 +130,6 @@ Rails.application.routes.draw do
         get '/piv_cac_entry' => 'piv_cac_authentication_test_subject#new'
         post '/piv_cac_entry' => 'piv_cac_authentication_test_subject#create'
 
-        get '/oidc' => 'oidc_test#index'
-
         get '/telephony' => 'telephony#index'
         delete '/telephony' => 'telephony#destroy'
         get '/push_notification' => 'push_notification#index'
@@ -135,6 +138,10 @@ Rails.application.routes.draw do
         get '/s3/:key' => 'fake_s3#show', as: :fake_s3
         put '/s3/:key' => 'fake_s3#update'
       end
+    end
+
+    if IdentityConfig.store.select_multiple_mfa_options
+      get '/auth_method_confirmation' => 'mfa_confirmation#show'
     end
 
     # Non-devise-controller routes. Alphabetically sorted.
@@ -206,8 +213,10 @@ Rails.application.routes.draw do
     match '/manage/phone/:id' => 'users/edit_phone#update', via: %i[patch put]
     delete '/manage/phone/:id' => 'users/edit_phone#destroy'
     get '/manage/personal_key' => 'users/personal_keys#show', as: :manage_personal_key
-    post '/account/personal_key' => 'users/personal_keys#create', as: :create_new_personal_key
     post '/manage/personal_key' => 'users/personal_keys#update'
+
+    get '/account/personal_key' => 'accounts/personal_keys#new', as: :create_new_personal_key
+    post '/account/personal_key' => 'accounts/personal_keys#create'
 
     get '/otp/send' => 'users/two_factor_authentication#send_code'
     get '/two_factor_options' => 'users/two_factor_authentication_setup#index'
@@ -257,6 +266,8 @@ Rails.application.routes.draw do
 
     delete '/users' => 'users#destroy', as: :destroy_user
 
+    get '/restricted' => 'banned_user#show', as: :banned_user
+
     scope '/verify', as: 'idv' do
       get '/' => 'idv#index'
       get '/activated' => 'idv#activated'
@@ -265,7 +276,6 @@ Rails.application.routes.draw do
       get '/come_back_later' => 'come_back_later#show'
       get '/personal_key' => 'personal_key#show'
       post '/personal_key' => 'personal_key#update'
-      get '/download_personal_key' => 'personal_key#download'
       get '/forgot_password' => 'forgot_password#new'
       post '/forgot_password' => 'forgot_password#update'
       get '/otp_delivery_method' => 'otp_delivery_method#new'
@@ -281,6 +291,7 @@ Rails.application.routes.draw do
       get '/review' => 'review#new'
       put '/review' => 'review#create'
       get '/session/errors/warning' => 'session_errors#warning'
+      get '/phone/errors/timeout' => 'phone_errors#timeout'
       get '/session/errors/failure' => 'session_errors#failure'
       get '/session/errors/ssn_failure' => 'session_errors#ssn_failure'
       get '/session/errors/exception' => 'session_errors#exception'
@@ -304,6 +315,10 @@ Rails.application.routes.draw do
       get '/capture_doc/return_to_sp' => 'capture_doc#return_to_sp'
       get '/capture_doc/:step' => 'capture_doc#show', as: :capture_doc_step
       put '/capture_doc/:step' => 'capture_doc#update'
+
+      get '/in_person' => 'in_person#index'
+      get '/in_person/:step' => 'in_person#show', as: :in_person_step
+      put '/in_person/:step' => 'in_person#update'
 
       # deprecated routes
       get '/confirmations' => 'personal_key#show'

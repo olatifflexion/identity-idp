@@ -50,6 +50,7 @@ en:
         heading: We could not match this phone number to other records
         jobfail: Something went wrong and we cannot process your request at this time.
           Please try again.
+        timeout: Our request to verify your information timed out. Please try again.
         warning: Please check the information you entered and try again.
       sessions:
         exception: There was an internal error processing your request.
@@ -68,10 +69,10 @@ en:
       reset_password: Reset password
       try_again: Try again
       warnings:
-        warning_1: If you forgot your password, you’ll need to reset it and fill out the
+        - If you forgot your password, you’ll need to reset it and fill out the
           form again.
-        warning_2: You’ll have to re-enter your personal information, like your name,
-          state ID number, etc.
+        - You’ll have to re-enter your personal information, like your name,
+          state-issued ID, etc.
     form:
       address1: Address
       address2: Address (optional)
@@ -88,10 +89,6 @@ en:
       activated_html: Your identity has been verified. If you need to change your
         verified information, please %{link}.
       activated_link: contact us
-      cancel: To continue, %{app_name} needs to verify your identity. We need to
-        collect some basic personal information as well as some financial
-        information from you to complete this process. If you don’t have the
-        information we need at this time you can continue later.
       clear_and_start_over: Clear my information and start over
       come_back_later: Once your letter arrives, sign into %{app_name}, and enter your
         confirmation code when prompted.
@@ -122,7 +119,8 @@ en:
         rules:
           - be a phone plan associated with your name. You do not need to be the
             primary account holder.
-          - not be a virtual phone (such as Google Voice or Skype)
+          - not be a virtual phone (such as Google Voice or Skype) or a premium
+            rate (toll) number.
           - be a U.S. number
       return_to_profile: '‹ Return to your %{app_name} profile'
       review:
@@ -145,8 +143,7 @@ en:
       ssn: Social Security Number (SSN)
     titles:
       activated: Your identity has already been verified
-      cancel: We cannot verify your identity
-      come_back_later: Come back soon.
+      come_back_later: Come back soon
       mail:
         resend: Want another letter?
         verify: Want a letter?

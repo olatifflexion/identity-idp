@@ -119,7 +119,7 @@ describe 'idv/shared/_error.html.erb' do
     end
 
     context 'with options' do
-      let(:options) { [{text: 'Example', url: '#example'}] }
+      let(:options) { [{ text: 'Example', url: '#example' }] }
 
       it 'renders a list of troubleshooting options' do
         expect(rendered).to have_link('Example', href: '#example')
@@ -132,15 +132,15 @@ describe 'idv/shared/_error.html.erb' do
       let(:params) { { heading: heading } }
 
       it 'defaults to error' do
-        expect(rendered).to have_css('[src*="fail-x"]')
+        expect(rendered).to have_css('[src*="error"]')
       end
     end
 
     context 'warning' do
       let(:type) { :warning }
 
-      it 'includes decorative image' do
-        expect(rendered).to have_css('[src*="warning-lg"][alt=""]')
+      it 'includes informative image' do
+        expect(rendered).to have_css("[src*='warning'][alt=#{t('errors.alt.warning')}]")
       end
 
       it 'shows an appropriate troubleshooting heading' do
@@ -154,8 +154,8 @@ describe 'idv/shared/_error.html.erb' do
     context 'error' do
       let(:type) { :error }
 
-      it 'includes decorative image' do
-        expect(rendered).to have_css('[src*="fail-x"][alt=""]')
+      it 'includes informative image' do
+        expect(rendered).to have_css("[src*='error'][alt=#{t('errors.alt.error')}]")
       end
 
       it 'shows an appropriate troubleshooting heading' do

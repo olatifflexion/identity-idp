@@ -4,17 +4,10 @@
   <%= tag.meta name: 'acuant-sdk-initialization-creds', content: IdentityConfig.store.acuant_sdk_initialization_creds %>
   <%= stylesheet_link_tag 'document-capture' %>
 <% end %>
-<% SecureHeaders.append_content_security_policy_directives(
+<% add_document_capture_image_urls_to_csp(
      request,
-     connect_src: [
-       front_image_upload_url,
-       back_image_upload_url,
-       selfie_image_upload_url,
-     ].
-       compact.
-       map { |url| URI(url).tap { |uri| uri.query = nil }.to_s },
+     [front_image_upload_url, back_image_upload_url, selfie_image_upload_url],
    )
-
    session_id = flow_session[:document_capture_session_uuid]
 %>
 <%= tag.div id: 'document-capture-form', data: {
@@ -49,13 +42,13 @@
 <div class="no-js">
   <%= render 'idv/doc_auth/error_messages', flow_session: flow_session %>
 
-  <h1 class="margin-y-0">
+  <%= render PageHeadingComponent.new do %>
     <% if liveness_checking_enabled? %>
       <%= t('doc_auth.headings.document_capture_heading_with_selfie_html') %>
     <% else %>
       <%= t('doc_auth.headings.document_capture_heading_html') %>
     <% end %>
-  </h1>
+  <% end %>
 
   <%= validated_form_for(
         :doc_auth,
@@ -147,13 +140,13 @@
       ) %>
 </div>
 
-<%= nonced_javascript_tag do %>
+<%= backwards_compatible_javascript_tag do %>
   <% asset_keys = [
        'close-white-alt.svg',
        'id-card.svg',
        'spinner.gif',
        'spinner@2x.gif',
-       'alert/warning-lg.svg',
+       'status/warning.svg',
        'idv/capture-tips-clean.svg',
        'idv/capture-tips-surface.svg',
        'idv/capture-tips-lighting.svg',

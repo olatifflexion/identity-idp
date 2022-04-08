@@ -1,6 +1,8 @@
 class FakeAnalytics
   PiiDetected = Class.new(StandardError)
 
+  include AnalyticsEvents
+
   module PiiAlerter
     def track_event(event, original_attributes = {})
       attributes = original_attributes.dup
@@ -95,7 +97,11 @@ RSpec::Matchers.define :have_logged_event do |event_name, attributes|
   match do |actual|
     expect(actual).to be_kind_of(FakeAnalytics)
 
-    expect(actual.events[event_name]).to(be_any { |event| attributes <= event })
+    if RSpec::Support.is_a_matcher?(attributes)
+      expect(actual.events[event_name]).to include(attributes)
+    else
+      expect(actual.events[event_name]).to(be_any { |event| attributes <= event })
+    end
   end
 
   failure_message do |actual|

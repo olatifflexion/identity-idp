@@ -1,37 +1,9 @@
-@mixin color-list($color: $yellow) {
-  list-style: none;
-  padding: 0;
-
-  li {
-    padding-left: 1rem;
-    text-indent: -1rem;
-
-    &::before {
-      color: $color;
-      content: '•';
-      font-size: 2rem;
-      line-height: 1.5rem;
-      padding-right: 0.5rem;
-      vertical-align: -3px;
-    }
-  }
-}
-
-.circle-number {
-  border-radius: 50%;
-  font-size: 1rem;
-  font-weight: bold;
-  height: 1.6rem;
-  text-align: center;
-  width: 1.6rem;
-}
-
 .success-bullets {
   .success-bullet {
     padding: 1rem 1rem 1rem 0;
 
     &::before {
-      background-image: url(image-path('alert/success.svg'));
+      background-image: url('alert/success.svg');
       background-repeat: no-repeat;
       content: '';
       display: inline-block;
@@ -43,20 +15,4 @@
       width: 1rem;
     }
   }
-}
-
-.red-dots {
-  @include color-list($red);
-}
-
-.teal-dots {
-  @include color-list($teal);
-}
-
-.yellow-dots {
-  @include color-list($yellow);
-}
-
-.account-list-item {
-  padding-left: 3rem;
 }

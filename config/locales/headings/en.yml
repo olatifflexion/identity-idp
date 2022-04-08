@@ -29,10 +29,12 @@ en:
     edit_info:
       password: Change your password
       phone: Manage your phone settings
-    lock_failure: Here’s what you can do
+    mfa_setup:
+      first_authentication_method: You’ve added your first authentication method!
     passwords:
       change: Change your password
       confirm: Confirm your current password to continue
+      confirm_for_personal_key: Enter password and get a new personal key
       forgot: Forgot your password?
     personal_key: Save your personal key
     piv_cac:

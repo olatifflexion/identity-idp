@@ -18,6 +18,7 @@ RSpec.describe OpenidConnect::TokenController do
     let(:grant_type) { 'authorization_code' }
     let(:code) { identity.session_uuid }
     let(:client_id) { 'urn:gov:gsa:openidconnect:test' }
+    let(:service_provider) { build(:service_provider, issuer: client_id) }
     let(:client_assertion) do
       jwt_payload = {
         iss: client_id,
@@ -33,7 +34,10 @@ RSpec.describe OpenidConnect::TokenController do
     end
 
     let!(:identity) do
-      IdentityLinker.new(user, client_id).link_identity(rails_session_id: SecureRandom.hex, ial: 1)
+      IdentityLinker.new(user, service_provider).link_identity(
+        rails_session_id: SecureRandom.hex,
+        ial: 1,
+      )
     end
 
     context 'with valid params' do
@@ -79,6 +83,19 @@ RSpec.describe OpenidConnect::TokenController do
                error_details: hash_including(:grant_type))
 
         action
+      end
+    end
+
+    context 'with invalid form' do
+      let(:code) { { nested: 'code' } }
+
+      it 'is a 400 and has an error response and no id_token' do
+        action
+        expect(response).to be_bad_request
+
+        json = JSON.parse(response.body).with_indifferent_access
+        expect(json[:error]).to be_present
+        expect(json).to_not have_key(:id_token)
       end
     end
   end

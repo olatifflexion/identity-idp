@@ -1,4 +1,9 @@
 fr:
   forms:
+    messages:
+      one: 'Un message'
+      other: '%{count} messages'
+    dynamic: Dynamique
     button:
       cancel: Annuler
+      reset: Réinitialiser

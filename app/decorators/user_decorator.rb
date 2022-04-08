@@ -34,38 +34,8 @@ class UserDecorator
     end
   end
 
-  def lockout_time_remaining_in_words
-    current_time = Time.zone.now
-
-    distance_of_time_in_words(
-      current_time,
-      current_time + lockout_time_remaining,
-      true,
-      highest_measures: 2,
-    )
-  end
-
-  def lockout_time_remaining
-    (lockout_period - (Time.zone.now - user.second_factor_locked_at)).to_i
-  end
-
-  def confirmation_period_expired_error
-    I18n.t('errors.messages.confirmation_period_expired', period: confirmation_period)
-  end
-
-  def confirmation_period
-    current_time = Time.zone.now
-
-    distance_of_time_in_words(
-      current_time,
-      current_time + Devise.confirm_within,
-      true,
-      accumulate_on: :hours,
-    )
-  end
-
-  def masked_two_factor_phone_number
-    masked_number(MfaContext.new(user).phone_configurations.take&.phone)
+  def lockout_time_expiration
+    user.second_factor_locked_at + lockout_period
   end
 
   def active_identity_for(service_provider)
@@ -159,11 +129,6 @@ class UserDecorator
 
   private
 
-  def masked_number(number)
-    return '' if number.blank?
-    "***-***-#{number[-4..-1]}"
-  end
-
   def lockout_period
     return DEFAULT_LOCKOUT_PERIOD if lockout_period_config.blank?
     lockout_period_config.minutes
@@ -174,6 +139,6 @@ class UserDecorator
   end
 
   def lockout_period_expired?
-    (Time.zone.now - user.second_factor_locked_at) > lockout_period
+    lockout_time_expiration < Time.zone.now
   end
 end

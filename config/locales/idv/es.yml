@@ -54,6 +54,8 @@ es:
           otros registros
         jobfail: Algo ha fallado y no podemos procesar tu solicitud en este momento.
           Vuelve a intentarlo.
+        timeout: Nuestra solicitud para verificar tu información ha caducado. Vuelve a
+          intentarlo.
         warning: Por favor, verifique la información que ingresó y vuelva a intentarlo.
       sessions:
         exception: Hubo un error interno al procesar su solicitud.
@@ -74,9 +76,9 @@ es:
       reset_password: Restablecer la contraseña
       try_again: Inténtalo de nuevo
       warnings:
-        warning_1: Si olvidó su contraseña, deberá restablecerla y completarla nuevamente.
-        warning_2: Tendrá que volver a ingresar su información personal, como su nombre,
-          número de identificación del estado, etc.
+        - Si olvidó su contraseña, deberá restablecerla y completarla nuevamente.
+        - Tendrá que volver a ingresar su información personal, como su nombre,
+          documento de identidad emitido por el estado, etc.
     form:
       address1: Dirección
       address2: Dirección (opcional)
@@ -93,10 +95,6 @@ es:
       activated_html: Su identidad ha sido verificada. Si necesita cambiar la
         información verificada, por favor, %{link}.
       activated_link: Contáctenos
-      cancel: Para continuar %{app_name} necesita verificar su identidad. Necesitamos
-        recopilar información personal básica, así como su información
-        financiera para completar este proceso. Si no tiene la información que
-        necesitamos en este momento, puede continuar más tarde.
       clear_and_start_over: Borrar mi información y empezar de nuevo
       come_back_later: Una vez llegue tu carta, regístrate en %{app_name} e introduce
         tu código de confirmación cuando se te solicite.
@@ -127,7 +125,8 @@ es:
         rules:
           - ser un plan telefónico que esté asociado a su nombre. En este caso,
             no es necesario que usted sea el titular principal de la cuenta.
-          - no es un teléfono virtual (como Google Voice o Skype)
+          - no ser un teléfono virtual (como Google Voice o Skype), como tampoco
+            un número de teléfono de tarificación adicional (pago).
           - un número de EE. UU.
       return_to_profile: '‹ Volver a tu perfil de %{app_name}'
       review:
@@ -151,8 +150,7 @@ es:
       ssn: Número de Seguro Social (SSN, sigla en inglés)
     titles:
       activated: Ya se verificó tu identidad.
-      cancel: No podemos verificar su identidad.
-      come_back_later: Vuelve pronto.
+      come_back_later: Vuelve pronto
       mail:
         resend: '¿Desea otra carta?'
         verify: '¿Desea una carta?'
@@ -165,7 +163,7 @@ es:
       headings:
         missing_required_items: '¿Le falta alguno de estos puntos?'
         need_assistance: '¿Necesita ayuda inmediata? Así es como puede obtener ayuda:'
-        still_having_trouble: ¿Sigue teniendo dificultades?
+        still_having_trouble: '¿Sigue teniendo dificultades?'
       options:
         change_phone_number: Utiliza un número de teléfono diferente
         contact_support: Póngase en contacto con el servicio de asistencia de %{app_name}

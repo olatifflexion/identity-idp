@@ -1,5 +1,12 @@
 class User < ApplicationRecord
-  self.ignored_columns = %w[totp_timestamp]
+  self.ignored_columns = %w[
+    totp_timestamp
+    sign_in_count
+    current_sign_in_at
+    last_sign_in_at
+    current_sign_in_ip
+    last_sign_in_ip
+  ]
   include NonNullUuid
 
   include ::NewRelic::Agent::MethodTracer
@@ -9,7 +16,6 @@ class User < ApplicationRecord
     :recoverable,
     :registerable,
     :timeoutable,
-    :trackable,
     authentication_keys: [:email],
   )
 
@@ -49,6 +55,7 @@ class User < ApplicationRecord
   has_many :service_providers,
            through: :identities,
            source: :service_provider_record
+  has_many :sign_in_restrictions, dependent: :destroy
 
   attr_accessor :asserted_attributes
 
@@ -98,6 +105,16 @@ class User < ApplicationRecord
 
   def default_phone_configuration
     phone_configurations.order('made_default_at DESC NULLS LAST, created_at').first
+  end
+
+  def broken_personal_key?
+    window_start = IdentityConfig.store.broken_personal_key_window_start
+    window_finish = IdentityConfig.store.broken_personal_key_window_finish
+    last_personal_key_at = self.encrypted_recovery_code_digest_generated_at
+
+    (!last_personal_key_at || last_personal_key_at < window_finish) &&
+      active_profile.present? &&
+      (window_start..window_finish).cover?(active_profile.verified_at)
   end
 
   # To send emails asynchronously via ActiveJob.

@@ -3,11 +3,9 @@
 
 <%= render 'shared/sp_alert' %>
 
-<h1 class="margin-y-0">
-  <%= t('headings.passwords.forgot') %>
-</h1>
+<%= render PageHeadingComponent.new.with_content(t('headings.passwords.forgot')) %>
 
-<p class="mt-tiny margin-bottom-0" id="email-description">
+<p id="email-description">
   <%= t('instructions.password.forgot') %>
 </p>
 

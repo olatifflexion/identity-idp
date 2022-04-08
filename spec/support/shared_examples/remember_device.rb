@@ -26,7 +26,7 @@ shared_examples 'remember device' do
     expect_mfa_to_be_required_for_user(second_user)
 
     # Setup remember device as second user
-    check :remember_device
+    check t('forms.messages.remember_device')
     fill_in_code_with_last_phone_otp
     click_submit_default
 
@@ -51,7 +51,7 @@ shared_examples 'remember device' do
     user = remember_device_and_sign_out_user
 
     IdentityLinker.new(
-      user, 'urn:gov:gsa:openidconnect:sp:server'
+      user, build(:service_provider, issuer: 'urn:gov:gsa:openidconnect:sp:server')
     ).link_identity(verified_attributes: %w[email])
 
     visit oidc_url

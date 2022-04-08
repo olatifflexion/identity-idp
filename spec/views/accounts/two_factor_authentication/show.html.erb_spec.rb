@@ -8,8 +8,8 @@ describe 'accounts/two_factor_authentication/show.html.erb' do
     allow(user).to receive(:decorate).and_return(decorated_user)
     allow(view).to receive(:current_user).and_return(user)
     assign(
-      :view_model,
-      AccountShow.new(
+      :presenter,
+      AccountShowPresenter.new(
         decrypted_pii: nil, personal_key: nil, decorated_user: decorated_user,
         sp_session_request_url: nil, sp_name: nil,
         locked_for_session: false
@@ -31,8 +31,8 @@ describe 'accounts/two_factor_authentication/show.html.erb' do
 
     before do
       assign(
-        :view_model,
-        AccountShow.new(
+        :presenter,
+        AccountShowPresenter.new(
           decrypted_pii: nil, personal_key: nil, decorated_user: decorated_user,
           sp_session_request_url: nil, sp_name: nil,
           locked_for_session: false
@@ -56,9 +56,10 @@ describe 'accounts/two_factor_authentication/show.html.erb' do
       render
 
       expect(rendered).to have_content t('account.items.personal_key')
-      expect(rendered).
-        to have_button t('account.links.regenerate_personal_key')
-      expect(rendered).to have_xpath("//form[@action='#{create_new_personal_key_url}']")
+      expect(rendered).to have_link(
+        t('account.links.regenerate_personal_key'),
+        href: create_new_personal_key_url,
+      )
     end
   end
 

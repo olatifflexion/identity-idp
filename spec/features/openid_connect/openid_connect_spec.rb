@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'query_tracker'
 
 describe 'OpenID Connect' do
   include IdvHelper
@@ -87,16 +88,17 @@ describe 'OpenID Connect' do
 
     it 'auto-allows with a second authorization and includes redirect_uris in CSP headers' do
       client_id = 'urn:gov:gsa:openidconnect:sp:server'
+      service_provider = build(:service_provider, issuer: client_id)
       user = user_with_2fa
 
-      IdentityLinker.new(user, client_id).link_identity
+      IdentityLinker.new(user, service_provider).link_identity
       user.identities.last.update!(verified_attributes: ['email'])
 
       visit_idp_from_ial1_oidc_sp(client_id: client_id, prompt: 'select_account')
       sign_in_user(user)
 
       expect(page.response_headers['Content-Security-Policy']).
-        to(include('form-action \'self\' http://localhost:7654/auth/result https://example.com'))
+        to(include('form-action \'self\' http://localhost:7654 https://example.com'))
 
       fill_in_code_with_last_phone_otp
       click_submit_default
@@ -107,23 +109,24 @@ describe 'OpenID Connect' do
 
     it 'auto-allows and includes redirect_uris in CSP headers after an incorrect OTP' do
       client_id = 'urn:gov:gsa:openidconnect:sp:server'
+      service_provider = build(:service_provider, issuer: client_id)
       user = user_with_2fa
 
-      IdentityLinker.new(user, client_id).link_identity
+      IdentityLinker.new(user, service_provider).link_identity
       user.identities.last.update!(verified_attributes: ['email'])
 
       visit_idp_from_ial1_oidc_sp(client_id: client_id, prompt: 'select_account')
       sign_in_user(user)
 
       expect(page.response_headers['Content-Security-Policy']).
-        to(include('form-action \'self\' http://localhost:7654/auth/result https://example.com'))
+        to(include('form-action \'self\' http://localhost:7654 https://example.com'))
 
       fill_in :code, with: 'wrong otp'
       click_submit_default
 
       expect(page).to have_content(t('two_factor_authentication.invalid_otp'))
       expect(page.response_headers['Content-Security-Policy']).
-        to(include('form-action \'self\' http://localhost:7654/auth/result https://example.com'))
+        to(include('form-action \'self\' http://localhost:7654 https://example.com'))
 
       fill_in_code_with_last_phone_otp
       click_submit_default
@@ -151,8 +154,7 @@ describe 'OpenID Connect' do
     )
 
     expect(page.response_headers['Content-Security-Policy']).to include(
-      'form-action \'self\' gov.gsa.openidconnect.test://result '\
-      'gov.gsa.openidconnect.test://result/signout',
+      'form-action \'self\' gov.gsa.openidconnect.test:',
     )
 
     visit account_path
@@ -194,8 +196,7 @@ describe 'OpenID Connect' do
     token_response = sign_in_get_token_response(
       scope: 'openid email profile:verified_at',
       handoff_page_steps: proc do
-        expect(page).to have_content(t('help_text.requested_attributes.verified_at'))
-        expect(page).to have_content(t('help_text.requested_attributes.verified_at_blank'))
+        expect(page).not_to have_content(t('help_text.requested_attributes.verified_at'))
 
         click_agree_and_continue
       end,
@@ -266,7 +267,7 @@ describe 'OpenID Connect' do
         fill_out_phone_form_mfa_phone(user)
         click_idv_continue
 
-        fill_in :user_password, with: Features::SessionHelper::VALID_PASSWORD
+        fill_in t('idv.form.password'), with: Features::SessionHelper::VALID_PASSWORD
         click_continue
 
         acknowledge_and_confirm_personal_key(js: false)
@@ -293,7 +294,7 @@ describe 'OpenID Connect' do
   it 'prompts for consent if last consent time was over a year ago', driver: :mobile_rack_test do
     client_id = 'urn:gov:gsa:openidconnect:test'
     user = user_with_2fa
-    link_identity(user, client_id)
+    link_identity(user, build(:service_provider, issuer: client_id))
 
     user.identities.last.update(
       last_consented_at: 2.years.ago,
@@ -315,7 +316,7 @@ describe 'OpenID Connect' do
   it 'prompts for consent if consent was revoked/soft deleted', driver: :mobile_rack_test do
     client_id = 'urn:gov:gsa:openidconnect:test'
     user = user_with_2fa
-    link_identity(user, client_id)
+    link_identity(user, build(:service_provider, issuer: client_id))
 
     user.identities.last.update!(
       last_consented_at: 2.years.ago,
@@ -344,7 +345,7 @@ describe 'OpenID Connect' do
       code_challenge = Digest::SHA256.base64digest(code_verifier)
       user = user_with_2fa
 
-      link_identity(user, client_id)
+      link_identity(user, build(:service_provider, issuer: client_id))
       user.identities.last.update!(verified_attributes: ['email'])
 
       visit openid_connect_authorize_path(
@@ -387,7 +388,7 @@ describe 'OpenID Connect' do
     it 'returns the most recent nonce when there are multiple authorize calls' do
       client_id = 'urn:gov:gsa:openidconnect:test'
       user = user_with_2fa
-      link_identity(user, client_id)
+      link_identity(user, build(:service_provider, issuer: client_id))
       user.identities.last.update!(verified_attributes: ['email'])
 
       state1 = SecureRandom.hex
@@ -615,6 +616,14 @@ describe 'OpenID Connect' do
     end
   end
 
+  it 'does not make too many queries' do
+    queries = QueryTracker.track do
+      visit_idp_from_ial1_oidc_sp
+    end
+
+    expect(queries[:service_providers].count).to be <= 6
+  end
+
   def visit_idp_from_mobile_app_with_ial1(state: SecureRandom.hex)
     client_id = 'urn:gov:gsa:openidconnect:test'
     nonce = SecureRandom.hex
@@ -651,7 +660,7 @@ describe 'OpenID Connect' do
     code_verifier = SecureRandom.hex
     code_challenge = Digest::SHA256.base64digest(code_verifier)
 
-    link_identity(user, client_id)
+    link_identity(user, build(:service_provider, issuer: client_id))
     user.identities.last.update!(verified_attributes: ['email'])
 
     visit openid_connect_authorize_path(

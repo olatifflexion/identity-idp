@@ -1,13 +1,24 @@
+import { FormError } from '../components/form-steps';
+
 /** @typedef {import('../context/upload').UploadSuccessResponse} UploadSuccessResponse */
 /** @typedef {import('../context/upload').UploadErrorResponse} UploadErrorResponse */
 /** @typedef {import('../context/upload').UploadFieldError} UploadFieldError */
 
-export class UploadFormEntryError extends Error {
+export class UploadFormEntryError extends FormError {
   /** @type {string} */
   field = '';
+
+  /**
+   * @param {string} message
+   */
+  constructor(message) {
+    super();
+
+    this.message = message;
+  }
 }
 
-export class UploadFormEntriesError extends Error {
+export class UploadFormEntriesError extends FormError {
   /** @type {UploadFormEntryError[]} */
   formEntryErrors = [];
 
@@ -65,6 +76,14 @@ async function upload(payload, { method = 'POST', endpoint, csrf }) {
     // 4xx is an expected error state, handled after JSON deserialization. Anything else not OK
     // should be treated as an unhandled error.
     throw new Error(response.statusText);
+  }
+
+  if (response.url !== endpoint) {
+    window.onbeforeunload = null;
+    window.location.href = response.url;
+
+    // Avoid settling the promise, allowing the redirect to complete.
+    return new Promise(() => {});
   }
 
   const result = /** @type {UploadSuccessResponse|UploadErrorResponse} */ (await response.json());

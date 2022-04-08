@@ -25,7 +25,7 @@ describe 'Remembering a webauthn device' do
         mock_webauthn_verification_challenge
         sign_in_user(user)
         mock_press_button_on_hardware_key_on_verification
-        check :remember_device
+        check t('forms.messages.remember_device')
         click_button t('forms.buttons.continue')
         first(:link, t('links.sign_out')).click
         user
@@ -43,7 +43,7 @@ describe 'Remembering a webauthn device' do
         # webauthn option is hidden in browsers that don't support it
         select_2fa_option('webauthn', visible: :all)
         fill_in_nickname_and_click_continue
-        check :remember_device
+        check t('forms.messages.remember_device')
         mock_press_button_on_hardware_key_on_setup
 
         first(:link, t('links.sign_out')).click
@@ -58,9 +58,10 @@ describe 'Remembering a webauthn device' do
         mock_webauthn_setup_challenge
         sign_in_and_2fa_user(user)
         visit account_two_factor_authentication_path
-        click_link "+ #{t('account.index.webauthn_add')}", href: webauthn_setup_path
+
+        first(:link, t('account.index.webauthn_add'), href: webauthn_setup_path).click
         fill_in_nickname_and_click_continue
-        check :remember_device
+        check t('forms.messages.remember_device')
         mock_press_button_on_hardware_key_on_setup
         expect(page).to have_current_path(account_two_factor_authentication_path)
         first(:link, t('links.sign_out')).click
@@ -87,7 +88,7 @@ describe 'Remembering a webauthn device' do
         mock_webauthn_verification_challenge
         sign_in_user(user)
         mock_press_button_on_hardware_key_on_verification
-        check :remember_device
+        check t('forms.messages.remember_device')
         click_button t('forms.buttons.continue')
         first(:link, t('links.sign_out')).click
         user
@@ -105,7 +106,7 @@ describe 'Remembering a webauthn device' do
         # webauthn option is hidden in browsers that don't support it
         select_2fa_option('webauthn', visible: :all)
         fill_in_nickname_and_click_continue
-        check :remember_device
+        check t('forms.messages.remember_device')
         mock_press_button_on_hardware_key_on_setup
 
         first(:link, t('links.sign_out')).click
@@ -120,9 +121,9 @@ describe 'Remembering a webauthn device' do
         mock_webauthn_setup_challenge
         sign_in_and_2fa_user(user)
         visit account_two_factor_authentication_path
-        click_link "+ #{t('account.index.webauthn_add')}", href: webauthn_setup_path
+        first(:link, t('account.index.webauthn_add'), href: webauthn_setup_path).click
         fill_in_nickname_and_click_continue
-        check :remember_device
+        check t('forms.messages.remember_device')
         mock_press_button_on_hardware_key_on_setup
         expect(page).to have_current_path(account_two_factor_authentication_path)
         first(:link, t('links.sign_out')).click

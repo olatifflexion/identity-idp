@@ -33,7 +33,7 @@ describe RegisterUserEmailForm do
       end
 
       it 'creates throttle events after reaching throttle limit' do
-        existing_user = create(:user, :signed_up, email: 'taken@example.com')
+        create(:user, :signed_up, email: 'taken@example.com')
 
         (IdentityConfig.store.reg_confirmed_email_max_attempts + 1).times do
           subject.submit(email: 'TAKEN@example.com', terms_accepted: '1')
@@ -72,7 +72,7 @@ describe RegisterUserEmailForm do
       end
 
       it 'creates throttle events after reaching throttle limit' do
-        user = create(:user, email: 'test@example.com', confirmed_at: nil, uuid: '123')
+        create(:user, email: 'test@example.com', confirmed_at: nil, uuid: '123')
         (IdentityConfig.store.reg_unconfirmed_email_max_attempts + 1).times do
           subject.submit(email: 'test@example.com', terms_accepted: '1')
         end
@@ -235,6 +235,27 @@ describe RegisterUserEmailForm do
         }
 
         submit_form = subject.submit(email: 'not_taken@gmail.com')
+        expect(submit_form.success?).to eq false
+        expect(submit_form.extra).to eq extra
+        expect(submit_form.errors).to eq errors
+      end
+    end
+
+    context 'when user provides invalid email_language' do
+      it 'returns failure with errors' do
+        errors = { email_language: [t('errors.messages.inclusion')] }
+        extra = {
+          domain_name: 'gmail.com',
+          email_already_exists: false,
+          throttled: false,
+          user_id: 'anonymous-uuid',
+        }
+        submit_form = subject.submit(
+          email: 'not_taken@gmail.com',
+          terms_accepted: '1',
+          email_language: '01234567890',
+        )
+
         expect(submit_form.success?).to eq false
         expect(submit_form.extra).to eq extra
         expect(submit_form.errors).to eq errors

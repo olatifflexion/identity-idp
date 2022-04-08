@@ -1,33 +1,17 @@
 import Cleave from 'cleave.js';
 
-const { I18n } = window.LoginGov;
-
 /* eslint-disable no-new */
 function formatSSNFieldAndLimitLength() {
   const inputs = document.querySelectorAll('input.ssn-toggle[type="password"]');
 
   if (inputs) {
-    [].slice.call(inputs).forEach((input, i) => {
-      const el = `
-        <div class="margin-top-1 display-flex flex-justify-end">
-          <input
-            id="ssn-toggle-${i}"
-            type="checkbox"
-            class="usa-checkbox__input usa-checkbox__input--bordered"
-          >
-          <label for="ssn-toggle-${i}" class="usa-checkbox__label">
-            ${I18n.t('forms.ssn.show')}
-          </label>
-        </div>`;
-      input.insertAdjacentHTML('afterend', el);
-
-      const toggle = document.getElementById(`ssn-toggle-${i}`);
+    [].slice.call(inputs).forEach((input) => {
+      const toggle = document.querySelector(`[aria-controls="${input.id}"]`);
 
       let cleave;
 
       function sync() {
         const { value } = input;
-        input.type = toggle.checked ? 'text' : 'password';
         cleave?.destroy();
         if (toggle.checked) {
           cleave = new Cleave(input, {

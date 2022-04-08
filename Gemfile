@@ -1,21 +1,22 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo_name| "https://github.com/#{repo_name}.git" }
 
-ruby '~> 3.0.3'
+ruby "~> #{File.read('.ruby-version').strip}"
 
 gem 'rails', '~> 6.1.4'
 
 gem 'ahoy_matey', '~> 3.0'
-gem 'autoprefixer-rails', '~> 10.0'
 gem 'aws-sdk-kms', '~> 1.4'
 gem 'aws-sdk-pinpoint'
 gem 'aws-sdk-pinpointsmsvoice'
 gem 'aws-sdk-ses', '~> 1.6'
+gem 'aws-sdk-sns'
 gem 'base32-crockford'
 gem 'blueprinter', '~> 0.25.3'
 gem 'bootsnap', '~> 1.9.0', require: false
 gem 'browser'
 gem 'connection_pool'
+gem 'cssbundling-rails'
 gem 'devise', '~> 4.8'
 gem 'dotiw', '>= 4.0.1'
 gem 'faraday'
@@ -26,16 +27,15 @@ gem 'hiredis', '~> 0.6.0'
 gem 'http_accept_language'
 gem 'identity-hostdata', github: '18F/identity-hostdata', tag: 'v3.4.0'
 gem 'identity-logging', github: '18F/identity-logging', tag: 'v0.1.0'
-gem 'identity_validations', github: '18F/identity-validations', tag: 'v0.7.1'
+gem 'identity_validations', github: '18F/identity-validations', tag: 'v0.7.2'
 gem 'jsbundling-rails', '~> 1.0.0'
 gem 'jwt'
-gem 'local_time'
 gem 'lograge', '>= 0.11.2'
 gem 'lru_redux'
 gem 'maxminddb'
 gem 'multiset'
 gem 'net-sftp'
-gem 'newrelic_rpm', '~> 7.0'
+gem 'newrelic_rpm', '~> 8.0'
 gem 'pg'
 gem 'phonelib'
 gem 'premailer-rails', '>= 1.11.1'
@@ -47,15 +47,14 @@ gem 'rack-timeout', require: false
 gem 'redacted_struct'
 gem 'redis', '>= 3.2.0'
 gem 'redis-namespace'
-gem 'redis-session-store', github: '18f/redis-session-store', tag: 'v0.11.4-18f'
+gem 'redis-session-store', '>= 0.11.4'
 gem 'retries'
 gem 'rotp', '~> 6.1'
 gem 'rqrcode'
 gem 'ruby-progressbar'
 gem 'ruby-saml'
 gem 'safe_target_blank', '>= 1.0.2'
-gem 'saml_idp', github: '18F/saml_idp', tag: '0.15.0-18f'
-gem 'sassc-rails', '~> 2.1.2'
+gem 'saml_idp', github: '18F/saml_idp', tag: '0.16.0-18f'
 gem 'scrypt'
 gem 'secure_headers', '~> 6.3'
 gem 'simple_form', '>= 5.0.2'
@@ -64,10 +63,11 @@ gem 'strong_migrations', '>= 0.4.2'
 gem 'subprocess', require: false
 gem 'uglifier', '~> 4.2'
 gem 'valid_email', '>= 0.1.3'
-gem 'view_component', '~> 2.43.1', require: 'view_component/engine'
+gem 'view_component', '~> 2.51.0'
 gem 'webauthn', '~> 2.1'
 gem 'xmldsig', '~> 0.6'
 gem 'xmlenc', '~> 0.7', '>= 0.7.1'
+gem 'yard'
 
 # This version of the zxcvbn gem matches the data and behavior of the zxcvbn NPM package.
 # It should not be updated without verifying that the behavior still matches JS version 4.4.2.
@@ -88,11 +88,13 @@ group :development, :test do
   gem 'aws-sdk-cloudwatchlogs', require: false
   gem 'brakeman', require: false
   gem 'bullet', '>= 6.0.2'
+  gem 'data_uri', require: false
   gem 'erb_lint', '~> 0.1.0', require: false
   gem 'i18n-tasks', '>= 0.9.31'
   gem 'knapsack'
-  gem 'nokogiri', '~> 1.12.5'
+  gem 'nokogiri', '~> 1.13.2'
   gem 'parallel_tests'
+  gem 'pg_query', require: false
   gem 'pry-byebug'
   gem 'pry-doc'
   gem 'pry-rails'
@@ -107,7 +109,6 @@ end
 group :test do
   gem 'axe-core-rspec', '~> 4.2'
   gem 'bundler-audit', require: false
-  gem 'capybara-screenshot', '>= 1.0.23'
   gem 'capybara-selenium', '>= 0.0.6'
   gem 'simplecov', '~> 0.21.0', require: false
   gem 'simplecov-cobertura'

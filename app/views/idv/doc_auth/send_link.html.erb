@@ -8,9 +8,7 @@
       ) %>
 <% end %>
 
-<h1>
-  <%= t('doc_auth.headings.take_picture') %>
-</h1>
+<%= render PageHeadingComponent.new.with_content(t('doc_auth.headings.take_picture')) %>
 
 <p><%= t('doc_auth.info.take_picture') %></p>
 
@@ -21,7 +19,7 @@
       :doc_auth,
       url: url_for,
       method: 'PUT',
-      html: { autocomplete: 'off', class: 'margin-top-4' },
+      html: { autocomplete: 'off' },
     ) do |f| %>
   <%= render PhoneInputComponent.new(
         form: f,

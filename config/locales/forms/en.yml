@@ -2,13 +2,14 @@
 en:
   forms:
     backup_code:
-      are_you_sure_continue_prologue: If you don’t have access to any other authentication method,
-      are_you_sure_desc: '<br><b>Backup codes are not very safe</b> because they can
-        easily be lost or stolen. <b>If you can, choose a different method</b>
-        (use a phone, download an authentication application, or use a security
-        key). <br><br><b>If you continue with backup codes, keep them
-        safe</b>.  We’ll give you 10 codes that you can download, print, copy or
-        write down.  Later, you’ll have to enter one every time you sign in.'
+      are_you_sure_desc_html:
+        - <strong>Backup codes are not very safe</strong> because they can
+          easily be lost or stolen. <strong>If you can, choose a different
+          method</strong> (use a phone, download an authentication application,
+          or use a security key).
+        - <strong>If you continue with backup codes, keep them safe</strong>.
+          We’ll give you 10 codes that you can download, print, copy or write
+          down. Later, you’ll have to enter one every time you sign in.
       are_you_sure_title: Are you sure?  We’ll give you backup codes to save and use.
       caution_delete: If you delete your backup codes you will no longer be able to
         use them to sign in.
@@ -49,8 +50,6 @@ en:
       buttons:
         delete: Delete email address
     example: 'Example:'
-    file_input:
-      file_updated: File updated
     messages:
       remember_device: Remember this browser
     password: Password
@@ -60,7 +59,6 @@ en:
           submit: Change password
         labels:
           password: New password
-      show: Show password
     personal_key:
       alternative: Don’t have your personal key?
       confirmation_label: Personal key
@@ -129,8 +127,10 @@ en:
       continue: Continue
       instructions_text: Use Touch or Face Unlock to access your account with %{app_name}
       instructions_title: Use Touch or Face Unlock to access your account.
-      intro: Use Touch or Face Unlock to access your account.
-      login_text: When you are ready, press the button.
+      intro: Enable Face or Touch Unlock as an authentication method on this device.
+        You’ll need this device to use this method in the future. Start by
+        giving your device a nickname.
+      login_text: 'When you are ready, press the button:'
       nickname: Device nickname
     webauthn_setup:
       continue: Continue
@@ -139,5 +139,5 @@ en:
       intro: Add a security key that meets the FIDO standard as your authentication
         method. You can add as many security keys as you want. To get started,
         first give your security key a nickname.
-      login_text: When you are ready to authenticate, press the button
+      login_text: 'When you are ready to authenticate, press the button:'
       nickname: Security key nickname

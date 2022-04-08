@@ -12,7 +12,7 @@ feature 'SAML Authorization Confirmation' do
       user = user_with_2fa
 
       sign_in_user(user)
-      check :remember_device
+      check t('forms.messages.remember_device')
       fill_in_code_with_last_phone_otp
       click_submit_default
       visit request_url
@@ -82,21 +82,6 @@ feature 'SAML Authorization Confirmation' do
       # second visit
       visit request_url
       expect(current_url).to eq(request_url)
-    end
-
-    it 'does render the confirmation screen on a return visit to the SP if configured' do
-      allow(IdentityConfig.store).to receive(:show_select_account_on_repeat_sp_visits).
-        and_return(true)
-      second_email = create(:email_address, user: user1)
-      sign_in_user(user1, second_email.email)
-
-      # first visit
-      visit request_url
-      continue_as(second_email.email)
-
-      # second visit
-      visit request_url
-      expect(current_path).to eq(user_authorization_confirmation_path)
     end
 
     it 'redirects to the account page with no sp in session' do

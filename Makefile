@@ -10,7 +10,31 @@ PORT ?= 3000
 GZIP_COMMAND ?= gzip
 ARTIFACT_DESTINATION_FILE ?= ./tmp/idp.tar.gz
 
-.PHONY: brakeman check check_asset_strings docker_setup fast_setup fast_test help lint lint_country_dialing_codes lint_erb lint_optimized_assets lint_yaml lintfix normalize_yaml optimize_assets optimize_svg run run setup test update_pinpoint_supported_countries build_artifact
+.PHONY: \
+	analytics_events \
+	brakeman \
+	build_artifact \
+	check \
+	check_asset_strings \
+	docker_setup \
+	fast_setup \
+	fast_test \
+	help \
+	lint \
+	lint_analytics_events \
+	lint_country_dialing_codes \
+	lint_erb \
+	lint_optimized_assets \
+	lint_yaml \
+	lintfix \
+	normalize_yaml \
+	optimize_assets \
+	optimize_svg \
+	run \
+	urn \
+	setup \
+	test \
+	update_pinpoint_supported_countries
 
 help: ## Show this help
 	@echo "--- Help ---"
@@ -35,6 +59,8 @@ lint: ## Runs all lint tests
 	make lint_erb
 	@echo "--- rubocop ---"
 	bundle exec rubocop --parallel
+	@echo "--- analytics_events ---"
+	make lint_analytics_events
 	@echo "--- brakeman ---"
 	bundle exec brakeman
 	@echo "--- zeitwerk check ---"
@@ -42,6 +68,8 @@ lint: ## Runs all lint tests
 	@echo "--- bundler-audit ---"
 	bundle exec bundler-audit check --update
 	# JavaScript
+	@echo "--- yarn audit ---"
+	yarn audit --groups dependencies; test $$? -le 7
 	@echo "--- eslint ---"
 	yarn run lint
 	@echo "--- typescript ---"
@@ -56,7 +84,7 @@ lint: ## Runs all lint tests
 	@echo "--- check assets are optimized ---"
 	make lint_optimized_assets
 	@echo "--- stylelint ---"
-	yarn run stylelint app/assets/stylesheets/**/*.scss app/javascript/**/*.scss
+	yarn lint:css
 
 lint_erb: ## Lints ERB files
 	bundle exec erblint app/views app/components
@@ -74,9 +102,11 @@ brakeman: ## Runs brakeman
 public/packs/manifest.json: yarn.lock $(shell find app/javascript -type f) ## Builds JavaScript assets
 	yarn build
 
+test: export RAILS_ENV := test
 test: $(CONFIG) public/packs/manifest.json ## Runs RSpec and yarn tests
-	RAILS_ENV=test bundle exec rake parallel:spec && yarn test
+	bundle exec rake parallel:spec && yarn test
 
+fast_test: export RAILS_ENV := test
 fast_test: public/packs/manifest.json ## Abbreviated test run, runs RSpec tests without accessibility specs
 	bundle exec rspec --exclude-pattern "**/features/accessibility/*_spec.rb"
 
@@ -95,8 +125,12 @@ tmp/$(HOST)-$(PORT).key tmp/$(HOST)-$(PORT).crt: ## Self-signed cert for local H
 run: ## Runs the development server
 	foreman start -p $(PORT)
 
+urn:
+	@echo "⚱️"
+	make run
+
 run-https: tmp/$(HOST)-$(PORT).key tmp/$(HOST)-$(PORT).crt ## Runs the development server with HTTPS
-	HTTPS=on rails s -b "ssl://$(HOST):$(PORT)?key=tmp/$(HOST)-$(PORT).key&cert=tmp/$(HOST)-$(PORT).crt"
+	HTTPS=on FOREMAN_HOST="ssl://$(HOST):$(PORT)?key=tmp/$(HOST)-$(PORT).key&cert=tmp/$(HOST)-$(PORT).crt" foreman start -p $(PORT)
 
 normalize_yaml: ## Normalizes YAML files (alphabetizes keys, fixes line length, smart quotes)
 	yarn normalize-yaml .rubocop.yml --disable-sort-keys --disable-smart-punctuation
@@ -109,7 +143,7 @@ normalize_yaml: ## Normalizes YAML files (alphabetizes keys, fixes line length, 
 optimize_svg: ## Optimizes SVG images
 	# Without disabling minifyStyles, keyframes are removed (e.g. `app/assets/images/id-card.svg`).
 	# See: https://github.com/svg/svgo/issues/888
-	find app/assets/images public -name '*.svg' | xargs ./node_modules/.bin/svgo --multipass --disable minifyStyles --disable=removeViewBox --config '{"plugins":[{"removeAttrs":{"attrs":"data-name"}}]}'
+	find app/assets/images public -name '*.svg' -not -name 'sprite.svg' | xargs ./node_modules/.bin/svgo
 
 optimize_assets: optimize_svg ## Optimizes all assets
 
@@ -150,9 +184,28 @@ build_artifact $(ARTIFACT_DESTINATION_FILE): ## Builds zipped tar file artifact 
 	  --exclude='./certs/sp' \
 	  --exclude='./identity-idp-config' \
 	  --exclude='./tmp' \
+	  --exclude='./log' \
+	  --exclude='./app/javascript/packages/**/node_modules' \
 	  --exclude='./node_modules' \
 	  --exclude='./geo_data/GeoLite2-City.mmdb' \
 	  --exclude='./pwned_passwords/pwned_passwords.txt' \
 	  --exclude='./vendor/ruby' \
 	  --exclude='./config/application.yml' \
 	  -cf - "." | "$(GZIP_COMMAND)" > $(ARTIFACT_DESTINATION_FILE)
+
+analytics_events: public/api/_analytics-events.json ## Generates a JSON file that documents analytics events for events.log
+
+lint_analytics_events: .yardoc # Checks that all methods on AnalyticsEvents are documented
+	bundle exec ruby lib/analytics_events_documenter.rb --check $<
+
+public/api/_analytics-events.json: .yardoc .yardoc/objects/root.dat
+	mkdir -p public/api
+	bundle exec ruby lib/analytics_events_documenter.rb --json $< > $@
+
+.yardoc .yardoc/objects/root.dat: app/services/analytics_events.rb
+	bundle exec yard doc \
+		--type-tag identity.idp.event_name:"Event Name" \
+		--type-tag identity.idp.previous_event_name:"Previous Event Name" \
+		--no-output \
+		--db $@ \
+		-- $<

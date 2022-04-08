@@ -8,6 +8,7 @@ require 'rails/test_unit/railtie'
 require 'sprockets/railtie'
 require 'identity/logging/railtie'
 
+require_relative '../lib/asset_sources'
 require_relative '../lib/identity_config'
 require_relative '../lib/fingerprinter'
 require_relative '../lib/identity_job_log_subscriber'
@@ -18,10 +19,20 @@ APP_NAME = 'Login.gov'.freeze
 
 module Upaya
   class Application < Rails::Application
-    configuration = Identity::Hostdata::ConfigReader.new(app_root: Rails.root).read_configuration(
+    if (log_level = ENV['LOGIN_TASK_LOG_LEVEL'])
+      Identity::Hostdata.logger.level = log_level
+    end
+
+    configuration = Identity::Hostdata::ConfigReader.new(
+      app_root: Rails.root,
+      logger: Identity::Hostdata.logger,
+    ).read_configuration(
       Rails.env, write_copy_to: Rails.root.join('tmp', 'application.yml')
     )
     IdentityConfig.build_store(configuration)
+
+    AssetSources.manifest_path = Rails.root.join('public', 'packs', 'manifest.json')
+    AssetSources.cache_manifest = Rails.env.production? || Rails.env.test?
 
     console do
       if ENV['ALLOW_CONSOLE_DB_WRITE_ACCESS'] != 'true' &&
@@ -41,6 +52,7 @@ module Upaya
     config.active_record.belongs_to_required_by_default = false
     config.active_record.legacy_connection_handling = false
     config.assets.unknown_asset_fallback = true
+    config.assets.resolve_assets_in_css_urls = true
     config.active_job.queue_adapter = :good_job
 
     FileUtils.mkdir_p(Rails.root.join('log'))
@@ -55,7 +67,7 @@ module Upaya
     # see config/initializers/job_configurations.rb for cron schedule
 
     includes_star_queue = config.good_job.queues.split(';').any? do |name_threads|
-      name, threads = name_threads.split(':', 2)
+      name, _threads = name_threads.split(':', 2)
       name == '*'
     end
     raise 'good_job.queues does not contain *, but it should' if !includes_star_queue
@@ -90,6 +102,8 @@ module Upaya
     config.middleware.insert_before 0, HeadersFilter
     require 'utf8_sanitizer'
     config.middleware.use Utf8Sanitizer
+    require 'secure_cookies'
+    config.middleware.insert_after ActionDispatch::Static, SecureCookies
 
     # rubocop:disable Metrics/BlockLength
     config.middleware.insert_before 0, Rack::Cors do
@@ -124,6 +138,7 @@ module Upaya
         allowed_origins = [
           'https://www.login.gov',
           'https://login.gov',
+          'https://handbook.login.gov',
           %r{^https://federalist-[0-9a-f-]+\.app\.cloud\.gov$},
         ]
 
@@ -133,6 +148,7 @@ module Upaya
         end
 
         origins allowed_origins
+        resource '/api/analytics-events', headers: :any, methods: [:get]
         resource '/api/country-support', headers: :any, methods: [:get]
       end
     end

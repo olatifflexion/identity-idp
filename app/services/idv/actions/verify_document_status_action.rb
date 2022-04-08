@@ -53,7 +53,7 @@ module Idv
 
         delete_async
         if doc_pii_form_result.success?
-          extract_pii_from_doc(async_result)
+          extract_pii_from_doc(async_result, store_in_session: !hybrid_flow_mobile?)
 
           mark_step_complete(:document_capture)
           save_proofing_components
@@ -81,18 +81,17 @@ module Idv
         if verify_document_capture_session.nil?
           document_capture_analytics('failed to load verify_document_capture_session')
 
-          return timed_out
+          return missing
         end
 
         proofing_job_result = verify_document_capture_session.load_doc_auth_async_result
         if proofing_job_result.nil?
-          @flow.analytics.track_event(
-            Analytics::DOC_AUTH_ASYNC,
+          @flow.analytics.doc_auth_async(
             error: 'failed to load async result',
             uuid: verify_document_capture_session.uuid,
             result_id: verify_document_capture_session.result_id,
           )
-          return timed_out
+          return missing
         end
 
         proofing_job_result
@@ -106,10 +105,10 @@ module Idv
         ).remaining_count
       end
 
-      def timed_out
+      def missing
         delete_async
-        @flow.analytics.track_event(Analytics::PROOFING_DOCUMENT_TIMEOUT)
-        DocumentCaptureSessionAsyncResult.timed_out
+        @flow.analytics.proofing_document_result_missing
+        DocumentCaptureSessionAsyncResult.missing
       end
 
       def delete_async
@@ -117,12 +116,10 @@ module Idv
       end
 
       def document_capture_analytics(message)
-        data = {
+        @flow.analytics.doc_auth_async(
           error: message,
           uuid: flow_session[verify_document_capture_session_uuid_key],
-        }
-
-        @flow.analytics.track_event(Analytics::DOC_AUTH_ASYNC, data)
+        )
       end
     end
   end

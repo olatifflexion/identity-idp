@@ -41,6 +41,7 @@ class ApplicationController < ActionController::Base
   def session_expires_at
     return if @skip_session_expiration || @skip_session_load
     now = Time.zone.now
+    session[:session_started_at] = now if session[:session_started_at].nil?
     session[:session_expires_at] = now + Devise.timeout_in
     session[:pinged_at] ||= now
     redirect_on_timeout
@@ -106,6 +107,10 @@ class ApplicationController < ActionController::Base
     user_session[:context] || UserSessionContext::DEFAULT_CONTEXT
   end
 
+  def current_sp
+    @current_sp ||= sp_from_sp_session || sp_from_request_id
+  end
+
   private
 
   # These attributes show up in New Relic traces for all requests.
@@ -155,10 +160,6 @@ class ApplicationController < ActionController::Base
     params.permit(:request_id)
   end
 
-  def current_sp
-    @current_sp ||= sp_from_sp_session || sp_from_request_id || sp_from_request_issuer_logout
-  end
-
   def sp_from_sp_session
     ServiceProvider.find_by(issuer: sp_session[:issuer]) if sp_session[:issuer].present?
   end
@@ -188,9 +189,35 @@ class ApplicationController < ActionController::Base
     service_provider_mfa_policy.user_needs_sp_auth_method_setup? ? two_factor_options_url : nil
   end
 
+  def fix_broken_personal_key_url
+    return if !current_user.broken_personal_key?
+
+    flash[:info] = t('account.personal_key.needs_new')
+
+    pii_unlocked = Pii::Cacher.new(current_user, user_session).exists_in_session?
+
+    if pii_unlocked
+      cacher = Pii::Cacher.new(current_user, user_session)
+      profile = current_user.active_profile
+      user_session[:personal_key] = profile.encrypt_recovery_pii(cacher.fetch)
+      profile.save!
+
+      analytics.broken_personal_key_regenerated
+
+      manage_personal_key_url
+    else
+      user_session[:needs_new_personal_key] = true
+
+      capture_password_url
+    end
+  end
+
   def after_sign_in_path_for(_user)
-    service_provider_mfa_setup_url || add_piv_cac_setup_url ||
-      user_session.delete(:stored_location) || sp_session_request_url_with_updated_params ||
+    service_provider_mfa_setup_url ||
+      add_piv_cac_setup_url ||
+      fix_broken_personal_key_url ||
+      user_session.delete(:stored_location) ||
+      sp_session_request_url_with_updated_params ||
       signed_in_url
   end
 
@@ -224,7 +251,7 @@ class ApplicationController < ActionController::Base
       controller: controller_info,
       user_signed_in: user_signed_in?,
     )
-    flash[:error] = t('errors.invalid_authenticity_token')
+    flash[:error] = t('errors.general')
     redirect_back fallback_location: new_user_session_url, allow_other_host: false
   end
 
@@ -396,15 +423,27 @@ class ApplicationController < ActionController::Base
 
   def add_sp_cost(token)
     Db::SpCost::AddSpCost.call(
-      sp_session[:issuer].to_s,
+      current_sp,
       sp_session_ial,
       token,
       transaction_id: nil,
-      user_id: current_user.id,
+      user: current_user,
     )
   end
 
   def mobile?
     BrowserCache.parse(request.user_agent).mobile?
+  end
+
+  def user_is_banned?
+    return false unless user_signed_in?
+    BannedUserResolver.new(current_user).banned_for_sp?(issuer: current_sp&.issuer)
+  end
+
+  def handle_banned_user
+    return unless user_is_banned?
+    analytics.banned_user_redirect
+    sign_out
+    redirect_to banned_user_url
   end
 end

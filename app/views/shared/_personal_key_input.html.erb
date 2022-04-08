@@ -1,11 +1,20 @@
 <input aria-label="<%= t('forms.personal_key.confirmation_label') %>"
        autocomplete="off"
-       class="col-12 margin-bottom-6 border-dashed field monospace personal-key caps"
+       class="width-full margin-bottom-6 border-dashed field font-family-mono personal-key text-uppercase"
        maxlength="<%= PersonalKeyFormatter.code_length %>"
        name="personal_key"
        pattern="^<%= PersonalKeyFormatter.regexp_string %>$"
        required=""
        aria-invalid="false"
        spellcheck="false"
-       type="text" />
+       type="text"
+       aria-describedby="<%= 'personal-key-validation-message' if validation_needed %>" />
+<% if validation_needed %>
+  <%= render 'shared/validation_message',
+             {
+               id: 'personal-key-validation-message',
+               class: 'margin-bottom-2',
+               message: t('simple_form.required.text'),
+             } %>
+<% end %>
 <%= javascript_packs_tag_once('formatted-fields') %>

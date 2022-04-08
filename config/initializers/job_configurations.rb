@@ -1,10 +1,7 @@
 cron_5m = '0/5 * * * *'
-interval_5m = 5 * 60
 cron_1h = '0 * * * *'
-interval_1h = 60 * 60
 cron_24h = '0 0 * * *'
 gpo_cron_24h = '0 10 * * *' # 10am UTC is 5am EST/6am EDT
-inteval_24h = 24 * 60 * 60
 
 if defined?(Rails::Console)
   Rails.logger.info 'job_configurations: console detected, skipping schedule'
@@ -73,11 +70,6 @@ else
         args: -> { [Time.zone.today] },
       },
       # Send Sp Success Rate Report to S3
-      sp_success_rate: {
-        class: 'Reports::SpSuccessRateReport',
-        cron: cron_24h,
-        args: -> { [Time.zone.today] },
-      },
       # Proofing Costs Report to S3
       proofing_costs: {
         class: 'Reports::ProofingCostsReport',
@@ -122,6 +114,12 @@ else
       # Total SP Costs Report to S3
       total_sp_costs: {
         class: 'Reports::TotalSpCostReport',
+        cron: cron_24h,
+        args: -> { [Time.zone.today] },
+      },
+      # Total IAL2 Costs Report to S3
+      total_ial2_costs: {
+        class: 'Reports::TotalIal2CostsReport',
         cron: cron_24h,
         args: -> { [Time.zone.today] },
       },
@@ -188,6 +186,12 @@ else
       # Removes old rows from the Throttles table
       remove_old_throttles: {
         class: 'RemoveOldThrottlesJob',
+        cron: cron_1h,
+        args: -> { [Time.zone.now] },
+      },
+      # Sync opted out phone numbers from AWS
+      phone_number_opt_out_sync_job: {
+        class: 'PhoneNumberOptOutSyncJob',
         cron: cron_1h,
         args: -> { [Time.zone.now] },
       },

@@ -1,26 +1,5 @@
 // supplemental utility classes
 
-.hidden {
-  display: none;
-}
-
-.truncate-inline {
-  max-width: 80%;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.vertical-align::before {
-  content: ' ';
-  display: inline-block;
-  height: 100%;
-  vertical-align: middle;
-}
-
-.block-center {
-  margin: 0 auto;
-}
-
 html.no-js .js {
   display: none;
 }
@@ -35,12 +14,9 @@ html.js .no-js {
   transform: scale(0.7);
 }
 
-@media #{$breakpoint-sm} {
+@include at-media('tablet') {
   .sm-left-align {
     text-align: left;
-  }
-  .sm-right-align {
-    text-align: right;
   }
 }
 
@@ -48,8 +24,4 @@ html.js .no-js {
   margin: 0 auto;
   text-align: center;
   width: 300px;
-}
-
-.flex-no-shrink {
-  flex-shrink: 0;
 }

@@ -1,18 +1,19 @@
 <% title t('titles.passwords.confirm') %>
 
-<h1 class='margin-y-0'>
-  <%= t('headings.passwords.confirm') %>
-</h1>
-<p class='mt-tiny margin-bottom-0'>
+<%= render PageHeadingComponent.new.with_content(t('headings.passwords.confirm')) %>
+
+<p>
+  <%# for follow up: translate factor_to_change (LG-5701) %>
   <%= user_session[:no_factor_message] ||
         t('help_text.change_factor', factor: user_session[:factor_to_change]) %>
 </p>
+
 <%= validated_form_for(
       current_user,
       url: reauthn_user_password_path,
-      html: { autocomplete: 'off', method: 'post' },
+      html: { autocomplete: 'off', method: 'post', class: 'margin-top-6' },
     ) do |f| %>
-  <%= f.input :password, required: true, input_html: { aria: { invalid: false }, class: 'password-toggle' } %>
-  <%= f.button :submit, t('forms.buttons.continue'), class: 'usa-button--big usa-button--wide margin-top-2' %>
+  <%= render PasswordToggleComponent.new(form: f, required: true) %>
+  <%= f.button :submit, t('forms.buttons.continue'), class: 'display-block margin-y-5 usa-button--big usa-button--wide' %>
 <% end %>
 <%= render 'shared/cancel', link: account_path %>

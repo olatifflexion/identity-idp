@@ -1,3 +1,18 @@
+require 'feature_management'
+
+Rails.application.configure do
+  config.ssl_options = {
+    secure_cookies: true,
+    hsts: { preload: true, expires: 1.year, subdomains: true },
+  }
+
+  config.action_dispatch.default_headers.merge!(
+    'X-Frame-Options' => 'DENY',
+    'X-XSS-Protection' => '1; mode=block',
+    'X-Download-Options' => 'noopen',
+  )
+end
+
 SecureHeaders::Configuration.default do |config| # rubocop:disable Metrics/BlockLength
   config.hsts = "max-age=#{365.days.to_i}; includeSubDomains; preload"
   config.x_frame_options = 'DENY'
@@ -35,26 +50,24 @@ SecureHeaders::Configuration.default do |config| # rubocop:disable Metrics/Block
     ],
     style_src: ["'self'", IdentityConfig.store.asset_host.presence],
     base_uri: ["'self'"],
+    preserve_schemes: true,
+    disable_nonce_backwards_compatibility: IdentityConfig.store.disable_csp_unsafe_inline,
   }
 
   if IdentityConfig.store.rails_mailer_previews_enabled
+    default_csp_config[:style_src] << "'unsafe-inline'"
     # CSP 2.0 only; overriden by x_frame_options in some browsers
     default_csp_config[:frame_ancestors] = %w['self']
   end
 
-  config.csp = if !Rails.env.production?
-                 default_csp_config.merge(
-                   script_src: ["'self'", "'unsafe-eval'", "'unsafe-inline'"],
-                   style_src: ["'self'", "'unsafe-inline'"],
-                 )
-               else
-                 default_csp_config
-               end
+  default_csp_config[:script_src] = ["'self'", "'unsafe-eval'"] if !Rails.env.production?
 
   if ENV['WEBPACK_PORT']
-    config.csp[:connect_src] << "ws://localhost:#{ENV['WEBPACK_PORT']}"
-    config.csp[:script_src] << "localhost:#{ENV['WEBPACK_PORT']}"
+    default_csp_config[:connect_src] << "ws://localhost:#{ENV['WEBPACK_PORT']}"
+    default_csp_config[:script_src] << "localhost:#{ENV['WEBPACK_PORT']}"
   end
+
+  config.csp = SecureHeaders::OPT_OUT
 
   config.cookies = {
     secure: true, # mark all cookies as "Secure"
