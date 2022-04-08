@@ -9,4 +9,7 @@ es:
       autenticación elegidos.
     method_confirmation:
       face_id: Se ha agregado Face ID a su cuenta
+    second_method_warning: Agregue un segundo método de autenticación. Deberá
+      eliminar su cuenta y comenzar de nuevo si pierde su único método de
+      autenticación.
     skip: Saltar por ahora

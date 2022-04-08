@@ -8,4 +8,7 @@ en:
       backup if you lose one of your chosen authentication devices.
     method_confirmation:
       face_id: Face ID has been added to your account
+    second_method_warning: Add a second authentication method. You will have to
+      delete your account and start over if you lose your only authentication
+      method.
     skip: Skip for now
