@@ -90,4 +90,31 @@ describe 'sign_up/completions/show.html.erb' do
       expect(rendered).to include('9**-**-***6')
     end
   end
+
+  context 'MFA CTA banner' do
+    let(:multiple_factors_enabled) { false }
+
+    before do
+      allow(IdentityConfig.store).to receive(:select_multiple_mfa_options).and_return(true)
+      @multiple_factors_enabled = multiple_factors_enabled
+    end
+
+    it 'shows a banner if the user selects one MFA option' do
+      render
+      expect(rendered).to have_content(t('mfa.second_method_warning.text'))
+    end
+  end
+
+  context 'shows the banner with multiple factors enabled' do
+    let(:multiple_factors_enabled) { true }
+
+    before do
+      allow(IdentityConfig.store).to receive(:select_multiple_mfa_options).and_return(false)
+    end
+
+    it 'does not show a banner' do
+      render
+      expect(rendered).not_to have_content(t('mfa.second_method_warning.text'))
+    end
+  end
 end

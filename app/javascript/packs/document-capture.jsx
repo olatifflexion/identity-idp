@@ -12,10 +12,8 @@ import {
   FailedCaptureAttemptsContextProvider,
   HelpCenterContextProvider,
 } from '@18f/identity-document-capture';
-import { i18n } from '@18f/identity-i18n';
 import { isCameraCapableMobile } from '@18f/identity-device';
 import { trackEvent } from '@18f/identity-analytics';
-import { I18nContext } from '@18f/identity-react-i18n';
 
 /** @typedef {import('@18f/identity-document-capture').FlowPath} FlowPath */
 /** @typedef {import('@18f/identity-i18n').I18n} I18n */
@@ -58,6 +56,7 @@ import { I18nContext } from '@18f/identity-react-i18n';
  * @prop {FlowPath} flowPath
  * @prop {string} startOverUrl
  * @prop {string} cancelUrl
+ * @prop {string=} idvInPersonUrl
  *
  * @see AppContext
  * @see HelpCenterContextProvider
@@ -163,11 +162,12 @@ const noticeError = (error) =>
     flowPath,
     startOverUrl: startOverURL,
     cancelUrl: cancelURL,
+    idvInPersonUrl: idvInPersonURL,
   } = /** @type {AppRootData} */ (appRoot.dataset);
 
   const App = composeComponents(
     [AppContext.Provider, { value: { appName } }],
-    [HelpCenterContextProvider, { value: { helpCenterRedirectURL } }],
+    [HelpCenterContextProvider, { value: { helpCenterRedirectURL, idvInPersonURL } }],
     [DeviceContext.Provider, { value: device }],
     [AnalyticsContext.Provider, { value: { addPageAction, noticeError } }],
     [
@@ -197,7 +197,6 @@ const noticeError = (error) =>
         cancelURL,
       },
     ],
-    [I18nContext.Provider, { value: i18n.strings }],
     [ServiceProviderContextProvider, { value: getServiceProvider() }],
     [AssetContext.Provider, { value: assets }],
     [
