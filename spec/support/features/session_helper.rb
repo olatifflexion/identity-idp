@@ -21,19 +21,6 @@ module Features
       select_2fa_option(option)
     end
 
-    def select_mfa_options(first_option, second_option=first_option)
-      find("label[for='two_factor_options_form_selection_#{first_option}']").click
-      click_on t('forms.buttons.continue')
-      click_button t('forms.buttons.continue') if page.has_button?(t('forms.buttons.continue'))
-
-      if second_option != first_option
-        find("label[for='two_factor_options_form_selection_#{second_option}']").click
-        click_on t('forms.buttons.continue')
-        click_button t('forms.buttons.continue') if page.has_button?(t('forms.buttons.continue'))
-
-      end
-    end
-
     def select_2fa_option(option, **find_options)
       find("label[for='two_factor_options_form_selection_#{option}']", **find_options).click
       click_on t('forms.buttons.continue')
@@ -518,6 +505,18 @@ module Features
       click_send_security_code
       fill_in_code_with_last_phone_otp
       click_submit_default
+    end
+
+    def set_up_mfa_with_valid_phone
+      fill_in 'new_phone_form[phone]', with: '202-555-1212'
+      click_send_security_code
+      fill_in_code_with_last_phone_otp
+      click_submit_default
+    end
+
+    def set_up_mfa_with_backup_codes
+      click_on t('forms.buttons.continue')
+      click_on t('forms.buttons.continue')
     end
 
     def register_user(email = 'test@test.com')
