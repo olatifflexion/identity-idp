@@ -1,11 +1,10 @@
 require 'rails_helper'
 
 feature 'mfa cta banner' do
-	include DocAuthHelper
-	include SamlAuthHelper
+  include DocAuthHelper
+  include SamlAuthHelper
   
-
-	context 'multiple factor authentication feature is disabled' do
+  context 'multiple factor authentication feature is disabled' do
     it 'does not display a banner' do
       visit_idp_from_sp_with_ial1(:oidc)
       user = sign_up_and_set_password
@@ -39,9 +38,10 @@ feature 'mfa cta banner' do
       user = sign_up_and_set_password
       select_2fa_option('backup_code')
       click_continue
+      expect(page).to have_current_path(sign_up_completed_path)
       click_on(t('mfa.second_method_warning.link'))
 
-      expect(page).to have_current_path(sign_up_completed_path)
+      expect(response).to redirect_to two_factor_options_url(mfa_selected: false)
     end
 
     it 'does not display a banner' do
@@ -50,5 +50,5 @@ feature 'mfa cta banner' do
       select_2fa_option('backup_code')
       click_continue
     end
-  end    
+  end  
 end
