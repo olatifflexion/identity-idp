@@ -21,6 +21,19 @@ module Features
       select_2fa_option(option)
     end
 
+    def select_mfa_options(first_option, second_option=first_option)
+      find("label[for='two_factor_options_form_selection_#{first_option}']").click
+      click_on t('forms.buttons.continue')
+      click_button t('forms.buttons.continue') if page.has_button?(t('forms.buttons.continue'))
+
+      if second_option != first_option
+        find("label[for='two_factor_options_form_selection_#{second_option}']").click
+        click_on t('forms.buttons.continue')
+        click_button t('forms.buttons.continue') if page.has_button?(t('forms.buttons.continue'))
+
+      end
+    end
+
     def select_2fa_option(option, **find_options)
       find("label[for='two_factor_options_form_selection_#{option}']", **find_options).click
       click_on t('forms.buttons.continue')
