@@ -45,19 +45,17 @@ feature 'mfa cta banner' do
       expect(page).to have_current_path(backup_code_setup_path)
       set_up_mfa_with_backup_codes
       expect(page).to have_current_path(sign_up_completed_path)
-
       expect(page).not_to have_content(t('mfa.second_method_warning.text'))
     end
 
-    # it 'redirects user to choose multiple methods of authentication when banner is displayed' do
-    #   visit_idp_from_sp_with_ial1(:oidc)
-    #   user = sign_up_and_set_password
-    #   select_2fa_option('backup_code')
-    #   click_continue
-    #   expect(page).to have_current_path(sign_up_completed_path)
-    #   click_on(t('mfa.second_method_warning.link'))
-
-    #   expect(response).to redirect_to two_factor_options_url(mfa_selected: false)
-    # end
+    it 'redirects user to choose multiple methods of authentication when banner is displayed' do
+      visit_idp_from_sp_with_ial1(:oidc)
+      sign_up_and_set_password
+      select_2fa_option('backup_code')
+      click_continue
+      expect(page).to have_current_path(sign_up_completed_path)
+      click_on(t('mfa.second_method_warning.link'))
+      expect(page).to have_content(t('two_factor_authentication.two_factor_choice'))
+    end
   end
 end
