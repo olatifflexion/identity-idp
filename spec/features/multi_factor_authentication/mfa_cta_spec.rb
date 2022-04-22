@@ -4,8 +4,8 @@ feature 'mfa cta banner' do
   include DocAuthHelper
   include SamlAuthHelper
 
-  context 'multiple factor authentication feature is disabled' do
-    it 'does not display a banner' do
+  context 'When multiple factor authentication feature is disabled' do
+    it 'does not display a banner as the feature is disabled' do
       visit_idp_from_sp_with_ial1(:oidc)
       user = sign_up_and_set_password
       select_2fa_option('backup_code')
@@ -17,12 +17,12 @@ feature 'mfa cta banner' do
     end
   end
 
-  context 'multiple factor authentication feature is enabled' do
+  context 'When the multiple factor authentication feature is enabled' do
     before do
       allow(IdentityConfig.store).to receive(:select_multiple_mfa_options).and_return(true)
     end
 
-    it 'displays a banner' do
+    it 'displays a banner after configuring a single MFA method' do
       visit_idp_from_sp_with_ial1(:oidc)
       user = sign_up_and_set_password
       select_2fa_option('backup_code')
@@ -33,7 +33,7 @@ feature 'mfa cta banner' do
       expect(page).to have_content(t('mfa.second_method_warning.text'))
     end
 
-    it 'does not display a banner' do
+    it 'does not display a banner after configuring multiple MFA methods' do
       visit_idp_from_sp_with_ial1(:oidc)
       sign_up_and_set_password
       check t('two_factor_authentication.two_factor_choice_options.phone')
@@ -48,7 +48,7 @@ feature 'mfa cta banner' do
       expect(page).not_to have_content(t('mfa.second_method_warning.text'))
     end
 
-    it 'redirects user to choose multiple methods of authentication when banner is displayed' do
+    it 'redirects user to select additional authentication methods' do
       visit_idp_from_sp_with_ial1(:oidc)
       sign_up_and_set_password
       select_2fa_option('backup_code')
