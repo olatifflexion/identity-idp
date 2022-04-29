@@ -140,9 +140,8 @@ Rails.application.routes.draw do
       end
     end
 
-    if IdentityConfig.store.select_multiple_mfa_options
-      get '/auth_method_confirmation' => 'mfa_confirmation#show'
-    end
+    get '/auth_method_confirmation' => 'mfa_confirmation#show'
+    post '/auth_method_confirmation/skip' => 'mfa_confirmation#skip'
 
     # Non-devise-controller routes. Alphabetically sorted.
     get '/.well-known/openid-configuration' => 'openid_connect/configuration#index',
@@ -221,6 +220,8 @@ Rails.application.routes.draw do
     get '/otp/send' => 'users/two_factor_authentication#send_code'
     get '/two_factor_options' => 'users/two_factor_authentication_setup#index'
     patch '/two_factor_options' => 'users/two_factor_authentication_setup#create'
+    get '/mfa_setup' => 'users/mfa_selection#index'
+    patch '/mfa_setup' => 'users/mfa_selection#create'
     get '/phone_setup' => 'users/phone_setup#index'
     patch '/phone_setup' => 'users/phone_setup#create'
     get '/aal3_required' => 'users/aal3#show'
