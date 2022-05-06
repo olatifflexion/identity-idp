@@ -43,8 +43,9 @@ module Users
     end
 
     def process_valid_form
-      user_session[:selected_mfa_options] = @two_factor_options_form.selection
-      redirect_to confirmation_path(user_session[:selected_mfa_options].first)
+      user_session[:mfa_selections] = @two_factor_options_form.selection
+      user_session[:suggest_second_mfa] = user_session[:mfa_selections].count == 1
+      redirect_to confirmation_path(user_session[:mfa_selections].first)
     end
 
     def handle_empty_selection

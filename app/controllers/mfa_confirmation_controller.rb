@@ -7,11 +7,12 @@ class MfaConfirmationController < ApplicationController
       current_user: current_user,
       next_path: next_path,
       final_path: after_mfa_setup_path,
+      suggest_second_mfa: user_session[:suggest_second_mfa],
     )
   end
 
   def skip
-    user_session.delete(:selected_mfa_options)
+    user_session.delete(:mfa_selections)
     user_session.delete(:next_mfa_selection_choice)
     redirect_to after_mfa_setup_path
   end
@@ -40,6 +41,7 @@ class MfaConfirmationController < ApplicationController
   end
 
   def next_path
+    return second_mfa_setup_path if user_session[:suggest_second_mfa]
     confirmation_path(next_mfa_selection_choice)
   end
 

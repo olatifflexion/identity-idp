@@ -18,15 +18,7 @@ module TwoFactorAuthentication
       post_analytics(result)
       if result.success?
         next_url = nil
-        if UserSessionContext.confirmation_context?(context)
-          next_mfa_setup_for_user = user_session.dig(
-            :selected_mfa_options,
-            determine_next_mfa_selection,
-          )
-          next_url = user_next_authentication_setup_path(
-            next_mfa_setup_for_user,
-          )
-        end
+        next_url = next_setup_path if UserSessionContext.confirmation_context?(context)
         handle_valid_otp(next_url)
       else
         handle_invalid_otp

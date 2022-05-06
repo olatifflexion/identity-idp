@@ -23,7 +23,7 @@ describe Users::MfaSelectionController do
   describe 'Submitting the form' do
     it 'submits the TwoFactorOptionsForm' do
       user = build(:user)
-      stub_sign_in_before_2fa(user)
+      stub_sign_in(user)
 
       voice_params = {
         two_factor_options_form: {
@@ -45,7 +45,7 @@ describe Users::MfaSelectionController do
 
     context 'when the selection is phone' do
       it 'redirects to phone setup page' do
-        stub_sign_in_before_2fa
+        stub_sign_in
 
         patch :update, params: {
           two_factor_options_form: {
@@ -72,7 +72,7 @@ describe Users::MfaSelectionController do
 
     context 'when multi selection with auth app first' do
       it 'redirects properly' do
-        stub_sign_in_before_2fa
+        stub_sign_in
         patch :update, params: {
           two_factor_options_form: {
             selection: ['auth_app', 'phone', 'webauthn'],
@@ -85,7 +85,7 @@ describe Users::MfaSelectionController do
 
     context 'when the selection is auth_app' do
       it 'redirects to authentication app setup page' do
-        stub_sign_in_before_2fa
+        stub_sign_in
 
         patch :update, params: {
           two_factor_options_form: {
@@ -99,7 +99,7 @@ describe Users::MfaSelectionController do
 
     context 'when the selection is webauthn' do
       it 'redirects to webauthn setup page' do
-        stub_sign_in_before_2fa
+        stub_sign_in
 
         patch :update, params: {
           two_factor_options_form: {
@@ -113,7 +113,7 @@ describe Users::MfaSelectionController do
 
     context 'when the selection is webauthn platform authenticator' do
       it 'redirects to webauthn setup page with the platform param' do
-        stub_sign_in_before_2fa
+        stub_sign_in
 
         patch :update, params: {
           two_factor_options_form: {
@@ -127,7 +127,7 @@ describe Users::MfaSelectionController do
 
     context 'when the selection is piv_cac' do
       it 'redirects to piv/cac setup page' do
-        stub_sign_in_before_2fa
+        stub_sign_in
 
         patch :update, params: {
           two_factor_options_form: {
@@ -141,7 +141,7 @@ describe Users::MfaSelectionController do
 
     context 'when the selection is not valid' do
       it 'renders index page' do
-        stub_sign_in_before_2fa
+        stub_sign_in
 
         patch :update, params: {
           two_factor_options_form: {
