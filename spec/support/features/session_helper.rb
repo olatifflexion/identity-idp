@@ -23,7 +23,7 @@ module Features
       select_2fa_option(option)
     end
 
-    def select_mfa_options(first_option, second_option=first_option)
+    def select_mfa_options(first_option, second_option = first_option)
       find("label[for='two_factor_options_form_selection_#{first_option}']").click
       click_on t('forms.buttons.continue')
       click_button t('forms.buttons.continue') if page.has_button?(t('forms.buttons.continue'))
@@ -321,18 +321,15 @@ module Features
       click_submit_default
     end
 
-    def acknowledge_and_confirm_personal_key(js: true)
-      button_text = t('forms.buttons.continue')
+    def acknowledge_and_confirm_personal_key
+      click_acknowledge_personal_key
 
-      click_on button_text, class: 'personal-key-continue' if js
-
-      fill_in 'personal_key', with: scrape_personal_key
-
-      find_all('.personal-key-confirm', text: button_text).first.click
+      page.find(':focus').fill_in with: scrape_personal_key
+      within('[role=dialog]') { click_continue }
     end
 
     def click_acknowledge_personal_key
-      click_on t('forms.buttons.continue'), class: 'personal-key-continue'
+      click_continue
     end
 
     def enter_personal_key(personal_key:, selector: 'input[type="text"]')
