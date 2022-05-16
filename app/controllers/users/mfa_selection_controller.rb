@@ -10,12 +10,12 @@ module Users
     def index
       @two_factor_options_form = TwoFactorOptionsForm.new(current_user)
       @presenter = two_factor_options_presenter
-      analytics.track_event(Analytics::USER_REGISTRATION_2FA_ADDITIONAL_SETUP_VISIT)
+      analytics.user_registration_2fa_additional_setup_visit
     end
 
     def update
       result = submit_form
-      analytics.track_event(Analytics::USER_REGISTRATION_2FA_ADDITIONAL_SETUP, result.to_h)
+      analytics.user_registration_2fa_additional_setup(**result.to_h)
 
       if result.success?
         process_valid_form
@@ -52,7 +52,8 @@ module Users
     end
 
     def multiple_factors_enabled?
-      IdentityConfig.store.select_multiple_mfa_options
+      return if IdentityConfig.store.select_multiple_mfa_options
+      redirect_to after_mfa_setup_path
     end
   end
 end

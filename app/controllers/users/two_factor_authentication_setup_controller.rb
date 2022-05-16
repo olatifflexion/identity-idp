@@ -10,12 +10,12 @@ module Users
     def index
       @two_factor_options_form = TwoFactorOptionsForm.new(current_user)
       @presenter = two_factor_options_presenter
-      analytics.track_event(Analytics::USER_REGISTRATION_2FA_SETUP_VISIT)
+      analytics.user_registration_2fa_setup_visit
     end
 
     def create
       result = submit_form
-      analytics.track_event(Analytics::USER_REGISTRATION_2FA_SETUP, result.to_h)
+      analytics.user_registration_2fa_setup(**result.to_h)
 
       if result.success?
         process_valid_form
