@@ -54,9 +54,7 @@ class TwoFactorOptionsForm
 
   def phone_alternative_enabled?
     count = MfaContext.new(user).enabled_mfa_methods_count
-    if count >= 2
-      return true
-    elsif count == 1 && MfaContext.new(user).phone_configurations.none?
+    if count >= 2 || (count == 1 && MfaContext.new(user).phone_configurations.none?)
       return true
     else
       return false
