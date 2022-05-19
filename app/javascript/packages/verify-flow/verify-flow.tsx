@@ -1,7 +1,8 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { FormSteps } from '@18f/identity-form-steps';
 import { trackEvent } from '@18f/identity-analytics';
 import { getConfigValue } from '@18f/identity-config';
+import { useObjectMemo } from '@18f/identity-react-hooks';
 import { STEPS } from './steps';
 import VerifyFlowStepIndicator from './verify-flow-step-indicator';
 import VerifyFlowAlert from './verify-flow-alert';
@@ -35,6 +36,8 @@ export interface VerifyFlowValues {
   ssn?: string;
 
   password?: string;
+
+  dob?: string;
 }
 
 interface VerifyFlowProps {
@@ -105,11 +108,9 @@ function VerifyFlow({
 
   const [syncedValues, setSyncedValues] = useSyncedSecretValues(initialValues);
   const [currentStep, setCurrentStep] = useState(steps[0].name);
+  const [values, setValues] = useState(syncedValues);
   const [initialStep, setCompletedStep] = useInitialStepValidation(basePath, steps);
-  const context = useMemo(
-    () => ({ startOverURL, cancelURL, currentStep }),
-    [startOverURL, cancelURL, currentStep],
-  );
+  const context = useObjectMemo({ startOverURL, cancelURL, currentStep, basePath });
   useEffect(() => {
     logStepVisited(currentStep);
   }, [currentStep]);
@@ -119,10 +120,15 @@ function VerifyFlow({
     setCompletedStep(stepName);
   }
 
+  function onChange(nextValues: Partial<VerifyFlowValues>) {
+    setValues(nextValues);
+    setSyncedValues(nextValues);
+  }
+
   return (
     <FlowContext.Provider value={context}>
       <VerifyFlowStepIndicator currentStep={currentStep} />
-      <VerifyFlowAlert currentStep={currentStep} />
+      <VerifyFlowAlert currentStep={currentStep} values={values} />
       <FormSteps
         steps={steps}
         initialValues={syncedValues}
@@ -130,7 +136,7 @@ function VerifyFlow({
         promptOnNavigate={false}
         basePath={basePath}
         titleFormat={`%{step} - ${getConfigValue('appName')}`}
-        onChange={setSyncedValues}
+        onChange={onChange}
         onStepSubmit={onStepSubmit}
         onStepChange={setCurrentStep}
         onComplete={onComplete}

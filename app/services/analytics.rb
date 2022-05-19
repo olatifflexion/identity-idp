@@ -138,21 +138,11 @@ class Analytics
 
   # rubocop:disable Layout/LineLength
   DOC_AUTH = 'Doc Auth' # visited or submitted is appended
-  IDV_START_OVER = 'IdV: start over'
-  IDV_GPO_ADDRESS_LETTER_REQUESTED = 'IdV: USPS address letter requested'
-  IDV_GPO_ADDRESS_SUBMITTED = 'IdV: USPS address submitted'
-  IDV_GPO_ADDRESS_VISITED = 'IdV: USPS address visited'
-  IDV_GPO_VERIFICATION_SUBMITTED = 'IdV: GPO verification submitted' # Previously: "Account verification submitted"
   IDV_GPO_VERIFICATION_VISITED = 'IdV: GPO verification visited' # Previously: "Account verification visited"
   INVALID_AUTHENTICITY_TOKEN = 'Invalid Authenticity Token'
   LOGOUT_INITIATED = 'Logout Initiated'
   MULTI_FACTOR_AUTH = 'Multi-Factor Authentication'
   MULTI_FACTOR_AUTH_ENTER_OTP_VISIT = 'Multi-Factor Authentication: enter OTP visited'
-  MULTI_FACTOR_AUTH_ENTER_PIV_CAC = 'Multi-Factor Authentication: enter PIV CAC visited'
-  MULTI_FACTOR_AUTH_ENTER_TOTP_VISIT = 'Multi-Factor Authentication: enter TOTP visited'
-  MULTI_FACTOR_AUTH_ENTER_PERSONAL_KEY_VISIT = 'Multi-Factor Authentication: enter personal key visited'
-  MULTI_FACTOR_AUTH_ENTER_BACKUP_CODE_VISIT = 'Multi-Factor Authentication: enter backup code visited'
-  MULTI_FACTOR_AUTH_ENTER_WEBAUTHN_VISIT = 'Multi-Factor Authentication: enter webAuthn authentication visited'
   MULTI_FACTOR_AUTH_MAX_ATTEMPTS = 'Multi-Factor Authentication: max attempts reached'
   MULTI_FACTOR_AUTH_OPTION_LIST = 'Multi-Factor Authentication: option list'
   MULTI_FACTOR_AUTH_OPTION_LIST_VISIT = 'Multi-Factor Authentication: option list visited'
