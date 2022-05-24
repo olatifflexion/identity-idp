@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   match '/api/openid_connect/token' => 'openid_connect/token#options', via: :options
   get '/api/openid_connect/userinfo' => 'openid_connect/user_info#show'
   post '/api/risc/security_events' => 'risc/security_events#create'
+  post '/api/irs_attempts_api/security_events' => 'api/irs_attempts_api#create'
 
   # SAML secret rotation paths
   SamlEndpoint.suffixes.each do |suffix|
@@ -332,7 +333,7 @@ Rails.application.routes.draw do
     end
 
     get '/verify/v2(/:step)' => 'verify#show', as: :idv_app
-    get '/verify/v2/password_confirm/forgot_password' => 'verify#show'
+    get '/verify/v2/password_confirm/forgot_password' => 'verify#show', as: :idv_app_forgot_password
 
     namespace :api do
       post '/verify/v2/password_confirm' => 'verify/password_confirm#create'
