@@ -18,6 +18,10 @@ feature 'doc auth verify step' do
   it 'is on the correct page' do
     expect(page).to have_current_path(idv_doc_auth_verify_step)
     expect(page).to have_content(t('doc_auth.headings.verify'))
+    expect(page).to have_css(
+      '.step-indicator__step--current',
+      text: t('step_indicator.flows.idv.verify_info'),
+    )
   end
 
   it 'masks the ssn' do
@@ -147,13 +151,6 @@ feature 'doc auth verify step' do
     end
   end
 
-  it 'shows the step indicator' do
-    expect(page).to have_css(
-      '.step-indicator__step--current',
-      text: t('step_indicator.flows.idv.verify_info'),
-    )
-  end
-
   context 'when the user lives in an AAMVA supported state' do
     it 'performs a resolution and state ID check' do
       agent = instance_double(Idv::Agent)
@@ -162,11 +159,10 @@ feature 'doc auth verify step' do
         success: true, errors: {}, context: { stages: [] },
       )
 
-      stub_const(
-        'Idv::Steps::VerifyBaseStep::AAMVA_SUPPORTED_JURISDICTIONS',
-        Idv::Steps::VerifyBaseStep::AAMVA_SUPPORTED_JURISDICTIONS +
-          [Idp::Constants::DEFAULT_MOCK_PII_FROM_DOC[:state_id_jurisdiction]],
+      allow(IdentityConfig.store).to receive(:aamva_supported_jurisdictions).and_return(
+        [Idp::Constants::MOCK_IDV_APPLICANT[:state_id_jurisdiction]],
       )
+
       sign_in_and_2fa_user
       complete_doc_auth_steps_before_verify_step
       click_idv_continue
@@ -185,11 +181,11 @@ feature 'doc auth verify step' do
         success: true, errors: {}, context: { stages: [] },
       )
 
-      stub_const(
-        'Idv::Steps::VerifyBaseStep::AAMVA_SUPPORTED_JURISDICTIONS',
-        Idv::Steps::VerifyBaseStep::AAMVA_SUPPORTED_JURISDICTIONS -
-          [Idp::Constants::DEFAULT_MOCK_PII_FROM_DOC[:state_id_jurisdiction]],
+      allow(IdentityConfig.store).to receive(:aamva_supported_jurisdictions).and_return(
+        IdentityConfig.store.aamva_supported_jurisdictions -
+          [Idp::Constants::MOCK_IDV_APPLICANT[:state_id_jurisdiction]],
       )
+
       sign_in_and_2fa_user
       complete_doc_auth_steps_before_verify_step
       click_idv_continue

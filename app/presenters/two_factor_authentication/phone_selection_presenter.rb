@@ -13,7 +13,7 @@ module TwoFactorAuthentication
     end
 
     def info
-      IdentityConfig.store.select_multiple_mfa_options &&
+      IdentityConfig.store.kantara_2fa_phone_restricted &&
         MfaContext.new(user).enabled_mfa_methods_count == 0 ?
           t('two_factor_authentication.two_factor_choice_options.phone_info_html') :
           t('two_factor_authentication.two_factor_choice_options.phone_info')
@@ -21,10 +21,6 @@ module TwoFactorAuthentication
 
     def mfa_configuration_count
       user.phone_configurations.count
-    end
-
-    def security_level
-      t('two_factor_authentication.two_factor_choice_options.less_secure_label')
     end
 
     def disabled?

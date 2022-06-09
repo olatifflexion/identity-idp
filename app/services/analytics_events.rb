@@ -648,6 +648,12 @@ module AnalyticsEvents
     )
   end
 
+  # @identity.idp.previous_event_name Account verification visited
+  # GPO verification visited
+  def idv_gpo_verification_visited
+    track_event('IdV: GPO verification visited')
+  end
+
   # User visits IdV
   def idv_intro_visit
     track_event('IdV: intro visited')
@@ -664,6 +670,16 @@ module AnalyticsEvents
       success: success,
       **extra,
     )
+  end
+
+  # User visited IDV password confirm page
+  def idv_password_confirm_visited
+    track_event('IdV: password confirm visited')
+  end
+
+  # User submitted IDV password confirm page
+  def idv_password_confirm_submitted
+    track_event('IdV: password confirm submitted')
   end
 
   # User visited IDV personal key page
@@ -761,6 +777,7 @@ module AnalyticsEvents
   # @param [String] country_code country code of phone number
   # @param [String] area_code area code of phone number
   # @param [Boolean] rate_limit_exceeded whether or not the rate limit was exceeded by this attempt
+  # @param [String] phone_fingerprint the hmac fingerprint of the phone number formatted as e164
   # @param [Hash] telephony_response response from Telephony gem
   # The user requested an OTP to confirm their phone during the IDV phone step
   def idv_phone_confirmation_otp_sent(
@@ -770,6 +787,7 @@ module AnalyticsEvents
     country_code:,
     area_code:,
     rate_limit_exceeded:,
+    phone_fingerprint:,
     telephony_response:,
     **extra
   )
@@ -781,6 +799,7 @@ module AnalyticsEvents
       country_code: country_code,
       area_code: area_code,
       rate_limit_exceeded: rate_limit_exceeded,
+      phone_fingerprint: phone_fingerprint,
       telephony_response: telephony_response,
       **extra,
     )
@@ -921,6 +940,22 @@ module AnalyticsEvents
     )
   end
 
+  # @param [String] controller
+  # @param [Boolean] user_signed_in
+  # Authenticity token (CSRF) is invalid
+  def invalid_authenticity_token(
+    controller:,
+    user_signed_in: nil,
+    **extra
+  )
+    track_event(
+      'Invalid Authenticity Token',
+      controller: controller,
+      user_signed_in: user_signed_in,
+      **extra,
+    )
+  end
+
   # @param [Integer] acknowledged_event_count number of acknowledged events in the API call
   # @param [Integer] rendered_event_count how many events were rendered in the API response
   # @param [String] set_errors JSON encoded representation of SET errors from the client
@@ -937,6 +972,82 @@ module AnalyticsEvents
       acknowledged_event_count: acknowledged_event_count,
       rendered_event_count: rendered_event_count,
       set_errors: set_errors,
+      **extra,
+    )
+  end
+
+  # @param [Boolean] success
+  # @param [String] client_id
+  # @param [Boolean] sp_initiated
+  # @param [Boolean] oidc
+  # @param [Boolean] saml_request_valid
+  # @param [Hash] errors
+  # @param [Hash] error_details
+  # @param [String] method
+  # Logout Initiated
+  def logout_initiated(
+    success: nil,
+    client_id: nil,
+    sp_initiated: nil,
+    oidc: nil,
+    saml_request_valid: nil,
+    errors: nil,
+    error_details: nil,
+    method: nil,
+    **extra
+  )
+    track_event(
+      'Logout Initiated',
+      success: success,
+      client_id: client_id,
+      errors: errors,
+      error_details: error_details,
+      sp_initiated: sp_initiated,
+      oidc: oidc,
+      saml_request_valid: saml_request_valid,
+      method: method,
+      **extra,
+    )
+  end
+
+  # @param [Boolean] success
+  # @param [Hash] errors
+  # @param [String] context
+  # @param [String] multi_factor_auth_method
+  # @param [Integer] auth_app_configuration_id
+  # @param [Integer] piv_cac_configuration_id
+  # @param [Integer] key_id
+  # @param [Integer] webauthn_configuration_id
+  # @param [Integer] phone_configuration_id
+  # @param [Boolean] confirmation_for_add_phone
+  # Multi-Factor Authentication
+  def multi_factor_auth(
+    success:,
+    errors: nil,
+    context: nil,
+    multi_factor_auth_method: nil,
+    auth_app_configuration_id: nil,
+    piv_cac_configuration_id: nil,
+    key_id: nil,
+    webauthn_configuration_id: nil,
+    confirmation_for_add_phone: nil,
+    phone_configuration_id: nil,
+    pii_like_keypaths: nil,
+    **extra
+  )
+    track_event(
+      'Multi-Factor Authentication',
+      success: success,
+      errors: errors,
+      context: context,
+      multi_factor_auth_method: multi_factor_auth_method,
+      auth_app_configuration_id: auth_app_configuration_id,
+      piv_cac_configuration_id: piv_cac_configuration_id,
+      key_id: key_id,
+      webauthn_configuration_id: webauthn_configuration_id,
+      confirmation_for_add_phone: confirmation_for_add_phone,
+      phone_configuration_id: phone_configuration_id,
+      pii_like_keypaths: pii_like_keypaths,
       **extra,
     )
   end
@@ -980,6 +1091,28 @@ module AnalyticsEvents
     )
   end
 
+  # @param [String] context
+  # @param [String] multi_factor_auth_method
+  # @param [Boolean] confirmation_for_add_phone
+  # @param [Integer] phone_configuration_id
+  # Multi-Factor Authentication enter OTP visited
+  def multi_factor_auth_enter_otp_visit(
+    context:,
+    multi_factor_auth_method:,
+    confirmation_for_add_phone:,
+    phone_configuration_id:,
+    **extra
+  )
+    track_event(
+      'Multi-Factor Authentication: enter OTP visited',
+      context: context,
+      multi_factor_auth_method: multi_factor_auth_method,
+      confirmation_for_add_phone: confirmation_for_add_phone,
+      phone_configuration_id: phone_configuration_id,
+      **extra,
+    )
+  end
+
   # @param ["authentication","reauthentication","confirmation"] context user session context
   # User visited the page to enter a TOTP as their mfa
   def multi_factor_auth_enter_totp_visit(context:, **extra)
@@ -1003,6 +1136,156 @@ module AnalyticsEvents
       context: context,
       multi_factor_auth_method: multi_factor_auth_method,
       webauthn_configuration_id: webauthn_configuration_id,
+      **extra,
+    )
+  end
+
+  # Max multi factor auth attempts met
+  def multi_factor_auth_max_attempts
+    track_event('Multi-Factor Authentication: max attempts reached')
+  end
+
+  # Multi factor selected from auth options list
+  # @param [Boolean] success
+  # @param [Hash] errors
+  # @param [String] selection
+  def multi_factor_auth_option_list(success:, errors:, selection:, **extra)
+    track_event(
+      'Multi-Factor Authentication: option list',
+      success: success,
+      errors: errors,
+      selection: selection,
+      **extra,
+    )
+  end
+
+  # User visited the list of multi-factor options to use
+  def multi_factor_auth_option_list_visit
+    track_event('Multi-Factor Authentication: option list visited')
+  end
+
+  # Multi factor auth phone setup
+  # @param [Boolean] success
+  # @param [Hash] errors
+  # @param [String] otp_delivery_preference
+  # @param [String] area_code
+  # @param [String] carrier
+  # @param [String] country_code
+  # @param [String] phone_type
+  # @param [Hash] types
+  # @param [Hash] pii_like_keypaths
+  def multi_factor_auth_phone_setup(success:,
+                                    errors:,
+                                    otp_delivery_preference:,
+                                    area_code:,
+                                    carrier:,
+                                    country_code:,
+                                    phone_type:,
+                                    types:,
+                                    **extra)
+
+    track_event(
+      'Multi-Factor Authentication: phone setup',
+      success: success,
+      errors: errors,
+      otp_delivery_preference: otp_delivery_preference,
+      area_code: area_code,
+      carrier: carrier,
+      country_code: country_code,
+      phone_type: phone_type,
+      types: types,
+      **extra,
+    )
+  end
+
+  # Max multi factor max otp sends reached
+  def multi_factor_auth_max_sends
+    track_event('Multi-Factor Authentication: max otp sends reached')
+  end
+
+  # Tracks when a user sets up a multi factor auth method
+  # @param [String] multi_factor_auth_method
+  def multi_factor_auth_setup(multi_factor_auth_method:, **extra)
+    track_event(
+      'Multi-Factor Authentication Setup',
+      multi_factor_auth_method: multi_factor_auth_method,
+      **extra,
+    )
+  end
+
+  # Tracks when an openid connect bearer token authentication request is made
+  # @param [Boolean] success
+  # @param [Hash] errors
+  def openid_connect_bearer_token(success:, errors:, **extra)
+    track_event(
+      'OpenID Connect: bearer token authentication',
+      success: success,
+      errors: errors,
+      **extra,
+    )
+  end
+
+  # Tracks when openid authorization request is made
+  # @param [String] client_id
+  # @param [String] scope
+  # @param [Array] acr_values
+  # @param [Boolean] unauthorized_scope
+  # @param [Boolean] user_fully_authenticated
+  def openid_connect_request_authorization(
+    client_id:,
+    scope:,
+    acr_values:,
+    unauthorized_scope:,
+    user_fully_authenticated:,
+    **extra
+  )
+    track_event(
+      'OpenID Connect: authorization request',
+      client_id: client_id,
+      scope: scope,
+      acr_values: acr_values,
+      unauthorized_scope: unauthorized_scope,
+      user_fully_authenticated: user_fully_authenticated,
+      **extra,
+    )
+  end
+
+  # Tracks when an openid connect token request is made
+  # @param [String] client_id
+  # @param [String] user_id
+  def openid_connect_token(client_id:, user_id:, **extra)
+    track_event(
+      'OpenID Connect: token',
+      client_id: client_id,
+      user_id: user_id,
+      **extra,
+    )
+  end
+
+  # Tracks when user makes an otp delivery selection
+  # @param [String] otp_delivery_preference (sms or voice)
+  # @param [Boolean] resend
+  # @param [String] country_code
+  # @param [String] area_code
+  # @param ["authentication","reauthentication","confirmation"] context user session context
+  # @param [Hash] pii_like_keypaths
+  def otp_delivery_selection(
+    otp_delivery_preference:,
+    resend:,
+    country_code:,
+    area_code:,
+    context:,
+    pii_like_keypaths:,
+    **extra
+  )
+    track_event(
+      'OTP: Delivery Selection',
+      otp_delivery_preference: otp_delivery_preference,
+      resend: resend,
+      country_code: country_code,
+      area_code: area_code,
+      context: context,
+      pii_like_keypaths: pii_like_keypaths,
       **extra,
     )
   end
@@ -1258,6 +1541,43 @@ module AnalyticsEvents
         service_provider: service_provider,
         **extra,
       }.compact,
+    )
+  end
+
+  # @param [String] area_code
+  # @param [String] country_code
+  # @param [String] phone_fingerprint the hmac fingerprint of the phone number formatted as e164
+  # @param [String] context the context of the OTP, either "authentication" for confirmed phones
+  # or "confirmation" for unconfirmed
+  # @param ["sms","voice"] otp_delivery_preference the channel used to send the message
+  # @param [Boolean] resend
+  # @param [Hash] telephony_response
+  # @param [Boolean] success
+  # A phone one-time password send was attempted
+  def telephony_otp_sent(
+    area_code:,
+    country_code:,
+    phone_fingerprint:,
+    context:,
+    otp_delivery_preference:,
+    resend:,
+    telephony_response:,
+    success:,
+    **extra
+  )
+    track_event(
+      'Telephony: OTP sent',
+      {
+        area_code: area_code,
+        country_code: country_code,
+        phone_fingerprint: phone_fingerprint,
+        context: context,
+        otp_delivery_preference: otp_delivery_preference,
+        resend: resend,
+        telephony_response: telephony_response,
+        success: success,
+        **extra,
+      },
     )
   end
 

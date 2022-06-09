@@ -7,6 +7,7 @@ CHANGELOG_REGEX =
 CATEGORIES = [
   'Improvements', 'Accessibility', 'Bug Fixes', 'Internal', 'Upcoming Features'
 ]
+MAX_CATEGORY_DISTANCE = 3
 SKIP_CHANGELOG_MESSAGE = '[skip changelog]'
 DEPENDABOT_COMMIT_MESSAGE = 'Signed-off-by: dependabot[bot] <support@github.com>'
 SECURITY_CHANGELOG = {
@@ -17,6 +18,7 @@ SECURITY_CHANGELOG = {
 
 SquashedCommit = Struct.new(:title, :commit_messages, keyword_init: true)
 ChangelogEntry = Struct.new(:category, :subcategory, :change, :pr_number, keyword_init: true)
+CategoryDistance = Struct.new(:category, :distance)
 
 # A valid entry has a line in a commit message in the form of:
 # changelog: CATEGORY, SUBCATEGORY, CHANGE_DESCRIPTION
@@ -87,6 +89,19 @@ def generate_invalid_changes(git_log)
   end.map(&:title)
 end
 
+def closest_change_category(change)
+  CATEGORIES.
+    map do |category|
+      CategoryDistance.new(
+        category,
+        DidYouMean::Levenshtein.distance(change[:category], category),
+      )
+    end.
+    filter { |category_distance| category_distance.distance <= MAX_CATEGORY_DISTANCE }.
+    max { |category_distance| category_distance.distance }&.
+    category
+end
+
 # Get the last valid changelog line for every Pull Request and tie it to the commit subject.
 # Each PR should be squashed, which results in every PR being one commit. The commit messages
 # in a squashed PR are concatencated with a leading "*" for each commit. Example:
@@ -112,13 +127,10 @@ def generate_changelog(git_log)
     next if item.commit_messages.any? { |message| message.include?(SKIP_CHANGELOG_MESSAGE) }
     change = build_changelog_from_commit(item)
     next unless change
+    category = closest_change_category(change)
+    next unless category
 
     pr_number = %r{\(#(?<pr>\d+)\)}.match(item[:title])
-
-    # Find most similar category
-    category = CATEGORIES.min_by do |category|
-      DidYouMean::Levenshtein.distance(change[:category], category)
-    end
 
     changelog_entry = ChangelogEntry.new(
       category: category,
@@ -142,7 +154,10 @@ def format_changelog(changelog_entries)
 
   changelog = ''
   CATEGORIES.each do |category|
-    category_changes = changelog_entries.filter { |ce| ce[0] == category }
+    category_changes = changelog_entries.
+      filter { |(changelog_category, _change), _changes| changelog_category == category }.
+      sort_by { |(_category, change), _changes| change }
+
     next if category_changes.empty?
     changelog.concat("## #{category}\n")
     category_changes.each do |group, entries|
@@ -167,8 +182,8 @@ def format_changelog(changelog_entries)
   changelog.strip
 end
 
-def main(args)
-  options = { base_branch: 'main' }
+def parsed_options(args)
+  options = { base_branch: 'main', source_branch: 'HEAD' }
   basename = File.basename($0)
 
   optparse = OptionParser.new do |opts|
@@ -185,12 +200,21 @@ def main(args)
       options[:base_branch] = val
     end
 
-    opts.on('-s', '--source_branch SOURCE_BRANCH', 'Name of source branch (required)') do |val|
+    opts.on(
+      '-s',
+      '--source_branch SOURCE_BRANCH',
+      'Name of source branch, defaults to HEAD',
+    ) do |val|
       options[:source_branch] = val
     end
   end
 
   optparse.parse!(args)
+  options
+end
+
+def main(args)
+  options = parsed_options(args)
 
   abort(optparse.help) if options[:source_branch].nil?
 
