@@ -21,6 +21,9 @@ fr:
         votre numéro de téléphone enregistré.
     delete_account:
       are_you_sure: Êtes-vous sûr de vouloir supprimer votre compte?
+      cancelled: Votre demande de suppression de votre compte a été annulée. Pour
+        reprendre la suppression, sélectionnez « supprimer le compte » dans le
+        menu de cette page.
       info: La suppression de votre compte devrait être votre dernier recours si vous
         êtes en lock-out de votre compte Vous ne pourrez pas récupérer les
         informations liées à ton compte. Nous informerons les agences auxquelles

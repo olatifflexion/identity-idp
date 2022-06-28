@@ -1,7 +1,5 @@
 <%# Text and translations tk %>
 
-<%= render AlertComponent.new(type: :info, text_tag: 'div') do %>
-  <p>
-    Your account is now restored
-  </p>
+<%= render AlertComponent.new(type: :info) do %>
+  <%= t('account_reset.delete_account.cancelled') %>
 <% end %>
