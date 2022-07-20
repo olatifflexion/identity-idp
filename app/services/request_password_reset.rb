@@ -60,8 +60,10 @@ RequestPasswordReset = RedactedStruct.new(
 
   def email_address_record
     @email_address_record ||= begin
-      EmailAddress.confirmed.find_with_email(email) ||
-        EmailAddress.unconfirmed.find_with_email(email)
+      EmailAddress.transaction do
+        EmailAddress.confirmed.find_with_email(email) ||
+          EmailAddress.unconfirmed.find_with_email(email)
+      end
     end
   end
 end
